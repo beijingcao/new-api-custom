@@ -415,6 +415,8 @@ export function PaymentSettingsSection({
   const saveAlipaySettings = async () => {
     const values = form.getValues()
     const sanitized = {
+      Price: values.Price as number,
+      MinTopUp: values.MinTopUp as number,
       AlipayEnabled: values.AlipayEnabled as boolean,
       AlipaySandbox: values.AlipaySandbox as boolean,
       AlipayAppID: values.AlipayAppID.trim(),
@@ -425,6 +427,8 @@ export function PaymentSettingsSection({
     }
 
     const initial = {
+      Price: initialRef.current.Price,
+      MinTopUp: initialRef.current.MinTopUp,
       AlipayEnabled: initialRef.current.AlipayEnabled,
       AlipaySandbox: initialRef.current.AlipaySandbox,
       AlipayAppID: initialRef.current.AlipayAppID.trim(),
@@ -434,7 +438,15 @@ export function PaymentSettingsSection({
       AlipayReturnURL: initialRef.current.AlipayReturnURL.trim(),
     }
 
-    const updates: Array<{ key: string; value: string | boolean }> = []
+    const updates: Array<{ key: string; value: string | number | boolean }> = []
+
+    if (sanitized.Price !== initial.Price) {
+      updates.push({ key: 'Price', value: sanitized.Price })
+    }
+
+    if (sanitized.MinTopUp !== initial.MinTopUp) {
+      updates.push({ key: 'MinTopUp', value: sanitized.MinTopUp })
+    }
 
     if (sanitized.AlipayEnabled !== initial.AlipayEnabled) {
       updates.push({ key: 'AlipayEnabled', value: sanitized.AlipayEnabled })
@@ -1008,6 +1020,52 @@ export function PaymentSettingsSection({
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className='grid gap-6 md:grid-cols-2'>
+              <FormField
+                control={form.control}
+                name='Price'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Price (local currency / USD)')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        step='0.01'
+                        min={0}
+                        value={(field.value ?? 0) as number}
+                        onChange={(event) =>
+                          field.onChange(event.target.valueAsNumber)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='MinTopUp'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Minimum top-up (USD)')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        step='0.01'
+                        min={0}
+                        value={(field.value ?? 0) as number}
+                        onChange={(event) =>
+                          field.onChange(event.target.valueAsNumber)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />

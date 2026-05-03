@@ -33,6 +33,8 @@ export default function SettingsPaymentGatewayAlipay(props) {
   const sectionTitle = props.hideSectionTitle ? undefined : t('支付宝官方设置');
   const [loading, setLoading] = useState(false);
   const [inputs, setInputs] = useState({
+    Price: 7.3,
+    MinTopUp: 1,
     AlipayEnabled: false,
     AlipaySandbox: false,
     AlipayAppID: '',
@@ -46,6 +48,14 @@ export default function SettingsPaymentGatewayAlipay(props) {
   useEffect(() => {
     if (props.options && formApiRef.current) {
       const currentInputs = {
+        Price:
+          props.options.Price !== undefined
+            ? parseFloat(props.options.Price)
+            : 7.3,
+        MinTopUp:
+          props.options.MinTopUp !== undefined
+            ? parseFloat(props.options.MinTopUp)
+            : 1,
         AlipayEnabled: !!props.options.AlipayEnabled,
         AlipaySandbox: !!props.options.AlipaySandbox,
         AlipayAppID: props.options.AlipayAppID || '',
@@ -80,6 +90,8 @@ export default function SettingsPaymentGatewayAlipay(props) {
           key: 'AlipaySandbox',
           value: inputs.AlipaySandbox ? 'true' : 'false',
         },
+        { key: 'Price', value: inputs.Price.toString() },
+        { key: 'MinTopUp', value: inputs.MinTopUp.toString() },
         { key: 'AlipayAppID', value: inputs.AlipayAppID || '' },
         {
           key: 'AlipayNotifyURL',
@@ -150,6 +162,26 @@ export default function SettingsPaymentGatewayAlipay(props) {
             </Col>
             <Col xs={24} sm={24} md={12} lg={12} xl={12}>
               <Form.Switch field='AlipaySandbox' label={t('沙箱模式')} />
+            </Col>
+          </Row>
+          <Row
+            gutter={{ xs: 8, sm: 16, md: 24, lg: 24, xl: 24, xxl: 24 }}
+            style={{ marginTop: 16 }}
+          >
+            <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+              <Form.InputNumber
+                field='Price'
+                precision={2}
+                label={t('充值价格（x元/美金）')}
+                placeholder={t('例如：7，就是7元/美金')}
+              />
+            </Col>
+            <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+              <Form.InputNumber
+                field='MinTopUp'
+                label={t('最低充值美元数量')}
+                placeholder={t('例如：2，就是最低充值2$')}
+              />
             </Col>
           </Row>
           <Row
