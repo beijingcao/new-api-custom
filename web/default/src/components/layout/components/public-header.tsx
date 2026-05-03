@@ -120,7 +120,10 @@ export function PublicHeader(props: PublicHeaderProps) {
                   />
                 )}
               </div>
-              <span className='text-sm font-semibold tracking-tight'>
+              <span
+                className='font-semibold tracking-tight'
+                style={publicNavTextStyle}
+              >
                 {loading ? <Skeleton className='h-4 w-16' /> : displaySiteName}
               </span>
             </Link>
@@ -185,7 +188,7 @@ export function PublicHeader(props: PublicHeaderProps) {
                   ) : (
                     <Button
                       size='sm'
-                      className='h-8 rounded-lg px-3.5 text-xs font-medium'
+                      className='h-8 rounded-lg px-3.5 font-medium'
                       style={publicNavTextStyle}
                       asChild
                     >
@@ -252,7 +255,7 @@ export function PublicHeader(props: PublicHeaderProps) {
                   to={link.href}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
-                    'flex items-center gap-3 py-3 text-base font-medium tracking-tight transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
+                    'flex items-center gap-3 py-3 font-medium tracking-tight transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
                     mobileOpen
                       ? 'translate-y-0 opacity-100'
                       : 'translate-y-4 opacity-0',
@@ -282,7 +285,7 @@ export function PublicHeader(props: PublicHeaderProps) {
               <Link
                 to={isAuthenticated ? '/dashboard' : '/sign-in'}
                 onClick={() => setMobileOpen(false)}
-                className='bg-foreground text-background inline-flex h-10 items-center justify-center rounded-lg text-sm font-medium transition-opacity hover:opacity-90 active:opacity-80'
+                className='bg-foreground text-background inline-flex h-10 items-center justify-center rounded-lg font-medium transition-opacity hover:opacity-90 active:opacity-80'
                 style={publicNavTextStyle}
               >
                 {isAuthenticated ? t('Go to Dashboard') : t('Sign in')}
