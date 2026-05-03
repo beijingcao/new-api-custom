@@ -48,10 +48,19 @@ type alipayPagePayBizContent struct {
 }
 
 func currentAlipayGateway() string {
+	gateway := alipayGatewayProduction
 	if setting.AlipaySandbox {
-		return alipayGatewaySandbox
+		gateway = alipayGatewaySandbox
 	}
-	return alipayGatewayProduction
+
+	gatewayURL, err := url.Parse(gateway)
+	if err != nil {
+		return gateway
+	}
+	query := gatewayURL.Query()
+	query.Set("charset", "utf-8")
+	gatewayURL.RawQuery = query.Encode()
+	return gatewayURL.String()
 }
 
 func decodeAlipayKey(raw string) ([]byte, error) {

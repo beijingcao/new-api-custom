@@ -94,6 +94,19 @@ func TestBuildAlipaySignContentSortsAndSkipsSignFields(t *testing.T) {
 	require.Equal(t, "a=1&b=two words", buildAlipaySignContent(values))
 }
 
+func TestCurrentAlipayGatewayIncludesCharsetQuery(t *testing.T) {
+	originalSandbox := setting.AlipaySandbox
+	t.Cleanup(func() {
+		setting.AlipaySandbox = originalSandbox
+	})
+
+	setting.AlipaySandbox = false
+	require.Equal(t, alipayGatewayProduction+"?charset=utf-8", currentAlipayGateway())
+
+	setting.AlipaySandbox = true
+	require.Equal(t, alipayGatewaySandbox+"?charset=utf-8", currentAlipayGateway())
+}
+
 func TestAlipayTopUpEnabledRequiresConfiguredKeys(t *testing.T) {
 	originalEnabled := setting.AlipayEnabled
 	originalSandbox := setting.AlipaySandbox
