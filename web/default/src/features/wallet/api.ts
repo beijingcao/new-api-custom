@@ -9,6 +9,7 @@ import type {
   RedemptionResponse,
   AmountResponse,
   PaymentResponse,
+  AlipayPaymentResponse,
   StripePaymentResponse,
   AffiliateCodeResponse,
   AffiliateTransferResponse,
@@ -76,6 +77,18 @@ export async function calculateStripeAmount(
 }
 
 /**
+ * Calculate payment amount for Alipay official payment
+ */
+export async function calculateAlipayAmount(
+  request: AmountRequest
+): Promise<AmountResponse> {
+  const res = await api.post('/api/user/alipay/amount', request, {
+    skipBusinessError: true,
+  } as Record<string, unknown>)
+  return res.data
+}
+
+/**
  * Request regular payment
  */
 export async function requestPayment(
@@ -100,6 +113,21 @@ export async function requestStripePayment(
     skipBusinessError: true,
   } as Record<string, unknown>)
   return res.data
+}
+
+/**
+ * Request Alipay official payment
+ */
+export async function requestAlipayPayment(
+  request: PaymentRequest
+): Promise<AlipayPaymentResponse> {
+  const res = await api.post('/api/user/alipay/pay', request, {
+    skipBusinessError: true,
+  } as Record<string, unknown>)
+  return {
+    ...res.data,
+    url: res.data.url || (res as unknown as { url?: string }).url,
+  }
 }
 
 /**

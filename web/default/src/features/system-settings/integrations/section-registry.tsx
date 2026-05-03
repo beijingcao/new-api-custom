@@ -33,6 +33,13 @@ const INTEGRATIONS_SECTIONS = [
           CreemWebhookSecret: settings.CreemWebhookSecret,
           CreemTestMode: settings.CreemTestMode,
           CreemProducts: settings.CreemProducts,
+          AlipayEnabled: settings.AlipayEnabled ?? false,
+          AlipaySandbox: settings.AlipaySandbox ?? false,
+          AlipayAppID: settings.AlipayAppID ?? '',
+          AlipayPrivateKey: settings.AlipayPrivateKey ?? '',
+          AlipayPublicKey: settings.AlipayPublicKey ?? '',
+          AlipayNotifyURL: settings.AlipayNotifyURL ?? '',
+          AlipayReturnURL: settings.AlipayReturnURL ?? '',
         }}
         waffoDefaultValues={{
           WaffoEnabled: settings.WaffoEnabled ?? false,

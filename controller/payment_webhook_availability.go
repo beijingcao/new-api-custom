@@ -85,6 +85,21 @@ func isWaffoPancakeWebhookEnabled() bool {
 	return isWaffoPancakeTopUpEnabled()
 }
 
+func isAlipayTopUpEnabled() bool {
+	return setting.AlipayEnabled &&
+		strings.TrimSpace(setting.AlipayAppID) != "" &&
+		strings.TrimSpace(setting.AlipayPrivateKey) != "" &&
+		strings.TrimSpace(setting.AlipayPublicKey) != ""
+}
+
+func isAlipayWebhookConfigured() bool {
+	return strings.TrimSpace(setting.AlipayPublicKey) != ""
+}
+
+func isAlipayWebhookEnabled() bool {
+	return isAlipayTopUpEnabled() && isAlipayWebhookConfigured()
+}
+
 func isEpayTopUpEnabled() bool {
 	return isEpayWebhookConfigured() && len(operation_setting.PayMethods) > 0
 }

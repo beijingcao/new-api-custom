@@ -90,6 +90,13 @@ func InitOptionMap() {
 	common.OptionMap["CreemProducts"] = setting.CreemProducts
 	common.OptionMap["CreemTestMode"] = strconv.FormatBool(setting.CreemTestMode)
 	common.OptionMap["CreemWebhookSecret"] = setting.CreemWebhookSecret
+	common.OptionMap["AlipayEnabled"] = strconv.FormatBool(setting.AlipayEnabled)
+	common.OptionMap["AlipaySandbox"] = strconv.FormatBool(setting.AlipaySandbox)
+	common.OptionMap["AlipayAppID"] = setting.AlipayAppID
+	common.OptionMap["AlipayPrivateKey"] = setting.AlipayPrivateKey
+	common.OptionMap["AlipayPublicKey"] = setting.AlipayPublicKey
+	common.OptionMap["AlipayNotifyURL"] = setting.AlipayNotifyURL
+	common.OptionMap["AlipayReturnURL"] = setting.AlipayReturnURL
 	common.OptionMap["WaffoEnabled"] = strconv.FormatBool(setting.WaffoEnabled)
 	common.OptionMap["WaffoApiKey"] = setting.WaffoApiKey
 	common.OptionMap["WaffoPrivateKey"] = setting.WaffoPrivateKey
@@ -329,6 +336,8 @@ func updateOptionMap(key string, value string) (err error) {
 			setting.DefaultUseAutoGroup = boolValue
 		case "ExposeRatioEnabled":
 			ratio_setting.SetExposeRatioEnabled(boolValue)
+		case "AlipayEnabled":
+			setting.AlipayEnabled = boolValue
 		}
 	}
 	switch key {
@@ -389,6 +398,20 @@ func updateOptionMap(key string, value string) (err error) {
 		setting.CreemTestMode = value == "true"
 	case "CreemWebhookSecret":
 		setting.CreemWebhookSecret = value
+	case "AlipayEnabled":
+		setting.AlipayEnabled = value == "true"
+	case "AlipaySandbox":
+		setting.AlipaySandbox = value == "true"
+	case "AlipayAppID":
+		setting.AlipayAppID = value
+	case "AlipayPrivateKey":
+		setting.AlipayPrivateKey = value
+	case "AlipayPublicKey":
+		setting.AlipayPublicKey = value
+	case "AlipayNotifyURL":
+		setting.AlipayNotifyURL = value
+	case "AlipayReturnURL":
+		setting.AlipayReturnURL = value
 	case "WaffoEnabled":
 		setting.WaffoEnabled = value == "true"
 	case "WaffoApiKey":

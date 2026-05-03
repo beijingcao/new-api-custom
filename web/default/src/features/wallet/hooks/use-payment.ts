@@ -3,14 +3,17 @@ import i18next from 'i18next'
 import { toast } from 'sonner'
 import {
   calculateAmount,
+  calculateAlipayAmount,
   calculateStripeAmount,
   calculateWaffoPancakeAmount,
   requestPayment,
+  requestAlipayPayment,
   requestStripePayment,
   isApiSuccess,
 } from '../api'
 import {
   isStripePayment,
+  isAlipayOfficialPayment,
   isWaffoPancakePayment,
   submitPaymentForm,
 } from '../lib'
@@ -31,12 +34,15 @@ export function usePayment() {
         setCalculating(true)
 
         const isStripe = isStripePayment(paymentType)
+        const isAlipayOfficial = isAlipayOfficialPayment(paymentType)
         const isPancake = isWaffoPancakePayment(paymentType)
         const response = isStripe
           ? await calculateStripeAmount({ amount: topupAmount })
-          : isPancake
-            ? await calculateWaffoPancakeAmount({ amount: topupAmount })
-            : await calculateAmount({ amount: topupAmount })
+          : isAlipayOfficial
+            ? await calculateAlipayAmount({ amount: topupAmount })
+            : isPancake
+              ? await calculateWaffoPancakeAmount({ amount: topupAmount })
+              : await calculateAmount({ amount: topupAmount })
 
         if (isApiSuccess(response) && response.data) {
           const calculatedAmount = parseFloat(response.data)
@@ -64,6 +70,7 @@ export function usePayment() {
         setProcessing(true)
 
         const isStripe = isStripePayment(paymentType)
+        const isAlipayOfficial = isAlipayOfficialPayment(paymentType)
         const amount = Math.floor(topupAmount)
 
         const response = isStripe
@@ -71,10 +78,15 @@ export function usePayment() {
               amount,
               payment_method: 'stripe',
             })
-          : await requestPayment({
-              amount,
-              payment_method: paymentType,
-            })
+          : isAlipayOfficial
+            ? await requestAlipayPayment({
+                amount,
+                payment_method: paymentType,
+              })
+            : await requestPayment({
+                amount,
+                payment_method: paymentType,
+              })
 
         if (!isApiSuccess(response)) {
           toast.error(response.message || i18next.t('Payment request failed'))
@@ -88,7 +100,7 @@ export function usePayment() {
           return true
         }
 
-        // Handle non-Stripe payment
+        // Handle form-submit payments
         if (!isStripe && response.data) {
           const url = (response as unknown as { url?: string }).url
           if (url) {

@@ -90,10 +90,31 @@ func GetTopUpInfo(c *gin.Context) {
 		}
 	}
 
+	enableAlipay := isAlipayTopUpEnabled()
+	if enableAlipay {
+		hasAlipayOfficial := false
+		for _, method := range payMethods {
+			if method["type"] == model.PaymentMethodAlipayOfficial {
+				hasAlipayOfficial = true
+				break
+			}
+		}
+
+		if !hasAlipayOfficial {
+			payMethods = append(payMethods, map[string]string{
+				"name":      "支付宝官方",
+				"type":      model.PaymentMethodAlipayOfficial,
+				"color":     "rgba(var(--semi-blue-5), 1)",
+				"min_topup": strconv.Itoa(operation_setting.MinTopUp),
+			})
+		}
+	}
+
 	data := gin.H{
 		"enable_online_topup":        isEpayTopUpEnabled(),
 		"enable_stripe_topup":        isStripeTopUpEnabled(),
 		"enable_creem_topup":         isCreemTopUpEnabled(),
+		"enable_alipay_topup":        enableAlipay,
 		"enable_waffo_topup":         enableWaffo,
 		"enable_waffo_pancake_topup": enableWaffoPancake,
 		"waffo_pay_methods": func() interface{} {

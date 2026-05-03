@@ -172,6 +172,13 @@ export type IntegrationSettings = {
   CreemWebhookSecret: string
   CreemTestMode: boolean
   CreemProducts: string
+  AlipayEnabled: boolean
+  AlipaySandbox: boolean
+  AlipayAppID: string
+  AlipayPrivateKey: string
+  AlipayPublicKey: string
+  AlipayNotifyURL: string
+  AlipayReturnURL: string
   WaffoEnabled: boolean
   WaffoApiKey: string
   WaffoPrivateKey: string
