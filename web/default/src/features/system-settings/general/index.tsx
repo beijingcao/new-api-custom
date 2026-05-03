@@ -13,6 +13,7 @@ const defaultGeneralSettings: GeneralSettings = {
   Notice: '',
   SystemName: 'New API',
   Logo: '',
+  PublicNavigationFontSize: 16,
   Footer: '',
   About: '',
   HomePageContent: '',

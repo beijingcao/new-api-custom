@@ -36,6 +36,7 @@ const _systemInfoSchema = z.object({
   SystemName: z.string().min(1),
   ServerAddress: z.string().optional(),
   Logo: z.string().url().optional().or(z.literal('')),
+  PublicNavigationFontSize: z.coerce.number().min(10).max(24),
   Footer: z.string().optional(),
   About: z.string().optional(),
   HomePageContent: z.string().optional(),
@@ -69,6 +70,9 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
     SystemName: normalizeValue(defaultValues.SystemName),
     ServerAddress: normalizeValue(defaultValues.ServerAddress),
     Logo: normalizeValue(defaultValues.Logo),
+    PublicNavigationFontSize: Number(
+      defaultValues.PublicNavigationFontSize || 16
+    ),
     Footer: normalizeValue(defaultValues.Footer),
     About: normalizeValue(defaultValues.About),
     HomePageContent: normalizeValue(defaultValues.HomePageContent),
@@ -88,6 +92,14 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
     }),
     ServerAddress: z.string().optional(),
     Logo: z.string().url().optional().or(z.literal('')),
+    PublicNavigationFontSize: z.coerce
+      .number()
+      .min(10, {
+        error: () => t('Public navigation font size must be at least 10px'),
+      })
+      .max(24, {
+        error: () => t('Public navigation font size must be at most 24px'),
+      }),
     Footer: z.string().optional(),
     About: z.string().optional(),
     HomePageContent: z.string().optional(),
@@ -236,6 +248,31 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
                   </FormControl>
                   <FormDescription>
                     {t('URL to your logo image (optional)')}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='PublicNavigationFontSize'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('Public Navigation Font Size')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type='number'
+                      min={10}
+                      max={24}
+                      step={1}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t(
+                      'Controls the homepage public navigation link font size in pixels'
+                    )}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

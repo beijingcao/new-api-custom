@@ -32,6 +32,7 @@ export type GeneralSettings = {
   Notice: string
   SystemName: string
   Logo: string
+  PublicNavigationFontSize: number
   Footer: string
   About: string
   HomePageContent: string

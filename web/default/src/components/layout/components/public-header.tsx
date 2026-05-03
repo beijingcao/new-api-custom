@@ -53,6 +53,7 @@ export function PublicHeader(props: PublicHeaderProps) {
   const {
     systemName,
     logo: systemLogo,
+    publicNavigationFontSize,
     loading,
     logoLoaded,
   } = useSystemConfig()
@@ -65,6 +66,9 @@ export function PublicHeader(props: PublicHeaderProps) {
   const isAuthenticated = !!user
   const displaySiteName = customSiteName || systemName
   const links = dynamicLinks.length > 0 ? dynamicLinks : navLinks
+  const publicNavTextStyle = {
+    fontSize: `${publicNavigationFontSize || 16}px`,
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -132,7 +136,8 @@ export function PublicHeader(props: PublicHeaderProps) {
                       href={link.href}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='text-muted-foreground hover:text-foreground rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors duration-200'
+                      className='text-muted-foreground hover:text-foreground rounded-lg px-3 py-1.5 font-medium transition-colors duration-200'
+                      style={publicNavTextStyle}
                     >
                       {t(link.title)}
                     </a>
@@ -143,11 +148,12 @@ export function PublicHeader(props: PublicHeaderProps) {
                     key={i}
                     to={link.href}
                     className={cn(
-                      'rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors duration-200',
+                      'rounded-lg px-3 py-1.5 font-medium transition-colors duration-200',
                       isActive
                         ? 'text-foreground'
                         : 'text-muted-foreground hover:text-foreground'
                     )}
+                    style={publicNavTextStyle}
                   >
                     {t(link.title)}
                   </Link>
@@ -180,6 +186,7 @@ export function PublicHeader(props: PublicHeaderProps) {
                     <Button
                       size='sm'
                       className='h-8 rounded-lg px-3.5 text-xs font-medium'
+                      style={publicNavTextStyle}
                       asChild
                     >
                       <Link to='/sign-in'>{t('Sign in')}</Link>

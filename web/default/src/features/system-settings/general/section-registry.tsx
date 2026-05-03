@@ -21,6 +21,7 @@ const GENERAL_SECTIONS = [
           Notice: settings.Notice,
           SystemName: settings.SystemName,
           Logo: settings.Logo,
+          PublicNavigationFontSize: settings.PublicNavigationFontSize,
           Footer: settings.Footer,
           About: settings.About,
           HomePageContent: settings.HomePageContent,
