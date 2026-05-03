@@ -45,20 +45,30 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
           <DropdownMenuContent side='bottom' align='start'>
             {normalizedLinks.map(
               ({ title, href, isActive, disabled, external }) => (
-                <DropdownMenuItem key={`${title}-${href}`} asChild>
+                <DropdownMenuItem
+                  key={`${title}-${href}`}
+                  className='text-base'
+                  asChild
+                >
                   {external ? (
                     <a
                       href={href}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className={!isActive ? 'text-muted-foreground' : ''}
+                      className={cn(
+                        'text-base',
+                        !isActive && 'text-muted-foreground'
+                      )}
                     >
                       {title}
                     </a>
                   ) : (
                     <Link
                       to={href}
-                      className={!isActive ? 'text-muted-foreground' : ''}
+                      className={cn(
+                        'text-base',
+                        !isActive && 'text-muted-foreground'
+                      )}
                       disabled={disabled}
                     >
                       {title}
@@ -86,7 +96,7 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
               href={href}
               target='_blank'
               rel='noopener noreferrer'
-              className={`hover:text-primary text-sm font-medium transition-colors ${isActive ? '' : 'text-muted-foreground'}`}
+              className={`hover:text-primary text-base font-medium transition-colors ${isActive ? '' : 'text-muted-foreground'}`}
             >
               {title}
             </a>
@@ -95,7 +105,7 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
               key={`${title}-${href}`}
               to={href}
               disabled={disabled}
-              className={`hover:text-primary text-sm font-medium transition-colors ${isActive ? '' : 'text-muted-foreground'}`}
+              className={`hover:text-primary text-base font-medium transition-colors ${isActive ? '' : 'text-muted-foreground'}`}
             >
               {title}
             </Link>
