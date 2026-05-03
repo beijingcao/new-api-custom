@@ -107,6 +107,22 @@ func TestCurrentAlipayGatewayIncludesCharsetQuery(t *testing.T) {
 	require.Equal(t, alipayGatewaySandbox+"?charset=utf-8", currentAlipayGateway())
 }
 
+func TestBuildAlipayRequestParamsUsesFixedOrderSubject(t *testing.T) {
+	privateKey, _ := generateAlipayTestKeys(t)
+	originalPrivateKey := setting.AlipayPrivateKey
+	t.Cleanup(func() {
+		setting.AlipayPrivateKey = originalPrivateKey
+	})
+	setting.AlipayPrivateKey = privateKey
+
+	params, err := buildAlipayRequestParams("USR1NOAwL8pZ1777790745", 7.30, "https://ai.num.cc/api/alipay/notify", "https://ai.num.cc/console/topup?show_history=true")
+	require.NoError(t, err)
+
+	var biz alipayPagePayBizContent
+	require.NoError(t, common.Unmarshal([]byte(params["biz_content"]), &biz))
+	require.Equal(t, alipayOrderSubject, biz.Subject)
+}
+
 func TestAlipayTopUpEnabledRequiresConfiguredKeys(t *testing.T) {
 	originalEnabled := setting.AlipayEnabled
 	originalSandbox := setting.AlipaySandbox

@@ -34,6 +34,7 @@ const (
 	alipayMethodPagePay     = "alipay.trade.page.pay"
 	alipayTradeSuccess      = "TRADE_SUCCESS"
 	alipayTradeFinished     = "TRADE_FINISHED"
+	alipayOrderSubject      = "基础信息服务"
 )
 
 type AlipayPayRequest struct {
@@ -188,12 +189,12 @@ func formatAlipayAmount(amount float64) string {
 	return decimal.NewFromFloat(amount).Round(2).StringFixed(2)
 }
 
-func buildAlipayRequestParams(tradeNo string, amount float64, subject string, notifyURL string, returnURL string) (map[string]string, error) {
+func buildAlipayRequestParams(tradeNo string, amount float64, notifyURL string, returnURL string) (map[string]string, error) {
 	biz := alipayPagePayBizContent{
 		OutTradeNo:  tradeNo,
 		ProductCode: "FAST_INSTANT_TRADE_PAY",
 		TotalAmount: formatAlipayAmount(amount),
-		Subject:     subject,
+		Subject:     alipayOrderSubject,
 	}
 	bizBytes, err := common.Marshal(biz)
 	if err != nil {
@@ -350,7 +351,7 @@ func RequestAlipayPay(c *gin.Context) {
 		return
 	}
 
-	params, err := buildAlipayRequestParams(tradeNo, payMoney, fmt.Sprintf("TUC%d", req.Amount), notifyURL, buildAlipayReturnURL())
+	params, err := buildAlipayRequestParams(tradeNo, payMoney, notifyURL, buildAlipayReturnURL())
 	if err != nil {
 		topUp.Status = common.TopUpStatusFailed
 		_ = topUp.Update()
