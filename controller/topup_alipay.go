@@ -126,7 +126,7 @@ func parseAlipayPublicKey(raw string) (*rsa.PublicKey, error) {
 func buildAlipaySignContent(values url.Values) string {
 	keys := make([]string, 0, len(values))
 	for key := range values {
-		if key == "sign" || key == "sign_type" || values.Get(key) == "" {
+		if key == "sign" || values.Get(key) == "" {
 			continue
 		}
 		keys = append(keys, key)

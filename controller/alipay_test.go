@@ -83,7 +83,7 @@ func TestAlipaySignAndVerifyRoundTrip(t *testing.T) {
 	require.Error(t, verifyAlipayParams(params, publicKey))
 }
 
-func TestBuildAlipaySignContentSortsAndSkipsSignFields(t *testing.T) {
+func TestBuildAlipaySignContentSortsAndOnlySkipsSign(t *testing.T) {
 	values := url.Values{}
 	values.Set("sign", "ignored")
 	values.Set("sign_type", "RSA2")
@@ -91,7 +91,7 @@ func TestBuildAlipaySignContentSortsAndSkipsSignFields(t *testing.T) {
 	values.Set("a", "1")
 	values.Set("empty", "")
 
-	require.Equal(t, "a=1&b=two words", buildAlipaySignContent(values))
+	require.Equal(t, "a=1&b=two words&sign_type=RSA2", buildAlipaySignContent(values))
 }
 
 func TestCurrentAlipayGatewayIncludesCharsetQuery(t *testing.T) {
