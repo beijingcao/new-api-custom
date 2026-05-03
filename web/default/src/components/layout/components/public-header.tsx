@@ -259,6 +259,7 @@ export function PublicHeader(props: PublicHeaderProps) {
                     isActive ? 'text-foreground' : 'text-muted-foreground'
                   )}
                   style={{
+                    ...publicNavTextStyle,
                     transitionDelay: mobileOpen ? `${100 + i * 50}ms` : '0ms',
                   }}
                 >
@@ -282,6 +283,7 @@ export function PublicHeader(props: PublicHeaderProps) {
                 to={isAuthenticated ? '/dashboard' : '/sign-in'}
                 onClick={() => setMobileOpen(false)}
                 className='bg-foreground text-background inline-flex h-10 items-center justify-center rounded-lg text-sm font-medium transition-opacity hover:opacity-90 active:opacity-80'
+                style={publicNavTextStyle}
               >
                 {isAuthenticated ? t('Go to Dashboard') : t('Sign in')}
               </Link>
