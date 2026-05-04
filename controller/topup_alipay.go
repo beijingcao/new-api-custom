@@ -125,9 +125,22 @@ func parseAlipayPublicKey(raw string) (*rsa.PublicKey, error) {
 }
 
 func buildAlipaySignContent(values url.Values) string {
+	return buildAlipaySignContentExcept(values, map[string]struct{}{
+		"sign": {},
+	})
+}
+
+func buildAlipayCallbackSignContent(values url.Values) string {
+	return buildAlipaySignContentExcept(values, map[string]struct{}{
+		"sign":      {},
+		"sign_type": {},
+	})
+}
+
+func buildAlipaySignContentExcept(values url.Values, excluded map[string]struct{}) string {
 	keys := make([]string, 0, len(values))
 	for key := range values {
-		if key == "sign" || values.Get(key) == "" {
+		if _, ok := excluded[key]; ok || values.Get(key) == "" {
 			continue
 		}
 		keys = append(keys, key)
@@ -180,7 +193,7 @@ func verifyAlipayParams(params map[string]string, publicKey string) error {
 		return err
 	}
 
-	signContent := buildAlipaySignContent(mapToAlipayValues(params))
+	signContent := buildAlipayCallbackSignContent(mapToAlipayValues(params))
 	hashed := sha256.Sum256([]byte(signContent))
 	return rsa.VerifyPKCS1v15(key, crypto.SHA256, hashed[:], signature)
 }
@@ -262,7 +275,14 @@ func buildAlipayReturnURL() string {
 	if serverAddress == "" {
 		return ""
 	}
-	return serverAddress + "/console/topup?show_history=true"
+	return serverAddress + buildAlipayTopUpReturnPath()
+}
+
+func buildAlipayTopUpReturnPath() string {
+	if common.GetTheme() == "default" {
+		return "/wallet?show_history=true"
+	}
+	return "/console/topup?show_history=true"
 }
 
 func RequestAlipayAmount(c *gin.Context) {

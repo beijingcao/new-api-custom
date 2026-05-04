@@ -1,14 +1,17 @@
 package controller
 
 import (
+	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -16,6 +19,7 @@ import (
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/setting"
+	"github.com/QuantumNous/new-api/setting/system_setting"
 	"github.com/gin-gonic/gin"
 	"github.com/glebarez/sqlite"
 	"github.com/stretchr/testify/require"
@@ -35,6 +39,33 @@ func generateAlipayTestKeys(t *testing.T) (string, string) {
 	require.NoError(t, err)
 
 	return string(privatePEM), base64.StdEncoding.EncodeToString(publicBytes)
+}
+
+func signAlipayCallbackTestParams(t *testing.T, params map[string]string, privateKey string) string {
+	t.Helper()
+
+	key, err := parseAlipayPrivateKey(privateKey)
+	require.NoError(t, err)
+
+	values := url.Values{}
+	keys := make([]string, 0, len(params))
+	for key, value := range params {
+		if key == "sign" || key == "sign_type" || value == "" {
+			continue
+		}
+		values.Set(key, value)
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	parts := make([]string, 0, len(keys))
+	for _, key := range keys {
+		parts = append(parts, key+"="+values.Get(key))
+	}
+	hashed := sha256.Sum256([]byte(strings.Join(parts, "&")))
+	signature, err := rsa.SignPKCS1v15(rand.Reader, key, crypto.SHA256, hashed[:])
+	require.NoError(t, err)
+	return base64.StdEncoding.EncodeToString(signature)
 }
 
 func setupAlipayControllerTestDB(t *testing.T) {
@@ -60,7 +91,7 @@ func setupAlipayControllerTestDB(t *testing.T) {
 	})
 }
 
-func TestAlipaySignAndVerifyRoundTrip(t *testing.T) {
+func TestAlipayVerifyCallbackRoundTrip(t *testing.T) {
 	privateKey, publicKey := generateAlipayTestKeys(t)
 	params := map[string]string{
 		"app_id":       "2021000000000000",
@@ -73,10 +104,7 @@ func TestAlipaySignAndVerifyRoundTrip(t *testing.T) {
 		"total_amount": "10.00",
 	}
 
-	sign, err := signAlipayParams(params, privateKey)
-	require.NoError(t, err)
-
-	params["sign"] = sign
+	params["sign"] = signAlipayCallbackTestParams(t, params, privateKey)
 	require.NoError(t, verifyAlipayParams(params, publicKey))
 
 	params["total_amount"] = "99.99"
@@ -105,6 +133,26 @@ func TestCurrentAlipayGatewayIncludesCharsetQuery(t *testing.T) {
 
 	setting.AlipaySandbox = true
 	require.Equal(t, alipayGatewaySandbox+"?charset=utf-8", currentAlipayGateway())
+}
+
+func TestBuildAlipayReturnURLUsesFrontendThemeRoute(t *testing.T) {
+	originalReturnURL := setting.AlipayReturnURL
+	originalServerAddress := system_setting.ServerAddress
+	originalTheme := common.GetTheme()
+	t.Cleanup(func() {
+		setting.AlipayReturnURL = originalReturnURL
+		system_setting.ServerAddress = originalServerAddress
+		common.SetTheme(originalTheme)
+	})
+
+	setting.AlipayReturnURL = ""
+	system_setting.ServerAddress = "https://ai.num.cc"
+
+	common.SetTheme("default")
+	require.Equal(t, "https://ai.num.cc/wallet?show_history=true", buildAlipayReturnURL())
+
+	common.SetTheme("classic")
+	require.Equal(t, "https://ai.num.cc/console/topup?show_history=true", buildAlipayReturnURL())
 }
 
 func TestBuildAlipayRequestParamsUsesFixedOrderSubject(t *testing.T) {
@@ -199,8 +247,7 @@ func TestAlipayNotifyCreditsPendingTopUp(t *testing.T) {
 		"timestamp":    "2026-05-03 12:00:00",
 		"version":      "1.0",
 	}
-	sign, err := signAlipayParams(params, privateKey)
-	require.NoError(t, err)
+	sign := signAlipayCallbackTestParams(t, params, privateKey)
 
 	form := url.Values{}
 	for key, value := range params {
