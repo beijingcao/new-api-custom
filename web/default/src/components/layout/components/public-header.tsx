@@ -78,6 +78,7 @@ export function PublicHeader(props: PublicHeaderProps) {
   const { auth } = useAuthStore()
   const {
     systemName,
+    siteLanguage,
     logo: systemLogo,
     publicNavigationFontSize,
     loading,
@@ -266,12 +267,12 @@ export function PublicHeader(props: PublicHeaderProps) {
 
               {showLanguageSwitcher && (
                 <a
-                  href='https://en.num.cc'
+                  href={siteLanguage === 'en' ? 'https://num.cc' : 'https://en.num.cc'}
                   target='_blank'
                   rel='noopener noreferrer'
                   className='text-foreground/70 hover:text-foreground inline-flex h-9 items-center justify-center px-2 text-sm font-medium transition-colors'
                 >
-                  English
+                  {siteLanguage === 'en' ? 'Chinese' : 'English'}
                 </a>
               )}
               {showNotifications && (

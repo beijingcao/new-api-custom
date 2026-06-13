@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useNotifications } from '@/hooks/use-notifications'
+import { useSystemConfig } from '@/hooks/use-system-config'
 import { useTopNavLinks } from '@/hooks/use-top-nav-links'
 import { NotificationPopover } from '@/components/notification-popover'
 import { ProfileDropdown } from '@/components/profile-dropdown'
@@ -100,6 +101,7 @@ export function AppHeader({
 
   // Notifications hook
   const notifications = useNotifications()
+  const { siteLanguage } = useSystemConfig()
 
   return (
     <>
@@ -131,12 +133,12 @@ export function AppHeader({
               />
             )}
             <a
-              href='https://en.num.cc'
+              href={siteLanguage === 'en' ? 'https://num.cc' : 'https://en.num.cc'}
               target='_blank'
               rel='noopener noreferrer'
               className='text-foreground/70 hover:text-foreground inline-flex h-9 items-center justify-center px-2 text-sm font-medium transition-colors'
             >
-              English
+              {siteLanguage === 'en' ? 'Chinese' : 'English'}
             </a>
             {showProfileDropdown && <ProfileDropdown />}
           </div>

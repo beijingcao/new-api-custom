@@ -55,6 +55,7 @@ const _systemInfoSchema = z.object({
   theme: z.object({
     frontend: z.enum(['default', 'classic']),
   }),
+  SiteLanguage: z.enum(['zh', 'en']),
   SystemName: z.string().min(1),
   ServerAddress: z.string().optional(),
   Logo: z.string().url().optional().or(z.literal('')),
@@ -88,6 +89,7 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
       frontend:
         defaultValues.theme?.frontend === 'classic' ? 'classic' : 'default',
     },
+    SiteLanguage: defaultValues.SiteLanguage === 'en' ? 'en' : 'zh',
     SystemName: normalizeValue(defaultValues.SystemName),
     ServerAddress: normalizeValue(defaultValues.ServerAddress),
     Logo: normalizeValue(defaultValues.Logo),
@@ -107,6 +109,7 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
     theme: z.object({
       frontend: z.enum(['default', 'classic']),
     }),
+    SiteLanguage: z.enum(['zh', 'en']),
     SystemName: z.string().min(1, {
       error: () => t('System name is required'),
     }),
@@ -205,6 +208,46 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
                     <FormDescription>
                       {t(
                         'Switch between the new frontend and the classic frontend. Changes take effect after page reload.'
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='SiteLanguage'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Site Language')}</FormLabel>
+                    <Select
+                      items={[
+                        { value: 'zh', label: t('Chinese Site') },
+                        { value: 'en', label: t('English Site') },
+                      ]}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className='w-full'>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent alignItemWithTrigger={false}>
+                        <SelectGroup>
+                          <SelectItem value='zh'>
+                            {t('Chinese Site')}
+                          </SelectItem>
+                          <SelectItem value='en'>
+                            {t('English Site')}
+                          </SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      {t(
+                        'Set the default language for the site. Chinese site shows an English link, English site shows a Chinese link.'
                       )}
                     </FormDescription>
                     <FormMessage />

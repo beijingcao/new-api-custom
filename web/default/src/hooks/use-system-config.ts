@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useEffect, useCallback } from 'react'
+import i18n from '@/i18n/config'
 import {
   useSystemConfigStore,
   type CurrencyConfig,
@@ -98,6 +99,7 @@ export function mapStatusDataToConfig(
 
   return {
     systemName: data.system_name || DEFAULT_SYSTEM_NAME,
+    siteLanguage: (data.site_language as string) || 'zh',
     logo: data.logo || DEFAULT_LOGO,
     publicNavigationFontSize: clampNumber(
       toNumber(data.public_navigation_font_size, 16),
@@ -167,6 +169,9 @@ export function useSystemConfig(options: UseSystemConfigOptions = {}) {
       setLoading(true)
       const newConfig = await fetchSystemConfig()
       setConfig(newConfig)
+      if (newConfig.siteLanguage && !localStorage.getItem('i18nextLng')) {
+        i18n.changeLanguage(newConfig.siteLanguage)
+      }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to load system config:', error)
