@@ -70,6 +70,8 @@ func InitOptionMap() {
 	common.OptionMap["Footer"] = common.Footer
 	common.OptionMap["SystemName"] = common.SystemName
 	common.OptionMap["SiteLanguage"] = common.SiteLanguage
+	common.OptionMap["EnglishSiteUrl"] = common.EnglishSiteUrl
+	common.OptionMap["ChineseSiteUrl"] = common.ChineseSiteUrl
 	common.OptionMap["Logo"] = common.Logo
 	common.OptionMap["PublicNavigationFontSize"] = "16"
 	common.OptionMap["ServerAddress"] = ""
@@ -505,6 +507,10 @@ func updateOptionMap(key string, value string) (err error) {
 		common.SystemName = value
 	case "SiteLanguage":
 		common.SiteLanguage = value
+	case "EnglishSiteUrl":
+		common.EnglishSiteUrl = value
+	case "ChineseSiteUrl":
+		common.ChineseSiteUrl = value
 	case "Logo":
 		common.Logo = value
 	case "WeChatServerAddress":

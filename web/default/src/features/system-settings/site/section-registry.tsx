@@ -40,6 +40,8 @@ const SITE_SECTIONS = [
             frontend: settings['theme.frontend'] as 'default' | 'classic',
           },
           SiteLanguage: (settings.SiteLanguage as 'zh' | 'en') || 'zh',
+          EnglishSiteUrl: settings.EnglishSiteUrl,
+          ChineseSiteUrl: settings.ChineseSiteUrl,
           SystemName: settings.SystemName,
           Logo: settings.Logo,
           PublicNavigationFontSize: settings.PublicNavigationFontSize,

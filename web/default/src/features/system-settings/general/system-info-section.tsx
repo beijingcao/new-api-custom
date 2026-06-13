@@ -56,6 +56,8 @@ const _systemInfoSchema = z.object({
     frontend: z.enum(['default', 'classic']),
   }),
   SiteLanguage: z.enum(['zh', 'en']),
+  EnglishSiteUrl: z.string().url().optional().or(z.literal('')),
+  ChineseSiteUrl: z.string().url().optional().or(z.literal('')),
   SystemName: z.string().min(1),
   ServerAddress: z.string().optional(),
   Logo: z.string().url().optional().or(z.literal('')),
@@ -90,6 +92,8 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
         defaultValues.theme?.frontend === 'classic' ? 'classic' : 'default',
     },
     SiteLanguage: defaultValues.SiteLanguage === 'en' ? 'en' : 'zh',
+    EnglishSiteUrl: normalizeValue(defaultValues.EnglishSiteUrl),
+    ChineseSiteUrl: normalizeValue(defaultValues.ChineseSiteUrl),
     SystemName: normalizeValue(defaultValues.SystemName),
     ServerAddress: normalizeValue(defaultValues.ServerAddress),
     Logo: normalizeValue(defaultValues.Logo),
@@ -110,6 +114,8 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
       frontend: z.enum(['default', 'classic']),
     }),
     SiteLanguage: z.enum(['zh', 'en']),
+    EnglishSiteUrl: z.string().url().optional().or(z.literal('')),
+    ChineseSiteUrl: z.string().url().optional().or(z.literal('')),
     SystemName: z.string().min(1, {
       error: () => t('System name is required'),
     }),
@@ -248,6 +254,50 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
                     <FormDescription>
                       {t(
                         'Set the default language for the site. Chinese site shows an English link, English site shows a Chinese link.'
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='EnglishSiteUrl'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('English Site URL')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='https://en.example.com'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t(
+                        'URL of the English site. Displayed as "English" link when site language is Chinese.'
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='ChineseSiteUrl'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Chinese Site URL')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='https://example.com'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t(
+                        'URL of the Chinese site. Displayed as "Chinese" link when site language is English.'
                       )}
                     </FormDescription>
                     <FormMessage />

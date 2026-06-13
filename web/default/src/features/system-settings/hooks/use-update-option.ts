@@ -26,6 +26,8 @@ import type { UpdateOptionRequest } from '../types'
 const STATUS_RELATED_KEYS = [
   'theme.frontend',
   'SiteLanguage',
+  'EnglishSiteUrl',
+  'ChineseSiteUrl',
   'HeaderNavModules',
   'SidebarModulesAdmin',
   'PublicNavigationFontSize',

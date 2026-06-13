@@ -79,6 +79,8 @@ export function PublicHeader(props: PublicHeaderProps) {
   const {
     systemName,
     siteLanguage,
+    englishSiteUrl,
+    chineseSiteUrl,
     logo: systemLogo,
     publicNavigationFontSize,
     loading,
@@ -265,9 +267,9 @@ export function PublicHeader(props: PublicHeaderProps) {
                 <div className='bg-border/40 mx-2 h-4 w-px' />
               )}
 
-              {showLanguageSwitcher && (
+              {showLanguageSwitcher && (siteLanguage === 'en' ? chineseSiteUrl : englishSiteUrl) && (
                 <a
-                  href={siteLanguage === 'en' ? 'https://num.cc' : 'https://en.num.cc'}
+                  href={siteLanguage === 'en' ? chineseSiteUrl : englishSiteUrl}
                   target='_blank'
                   rel='noopener noreferrer'
                   className='text-foreground/70 hover:text-foreground inline-flex h-9 items-center justify-center px-2 text-sm font-medium transition-colors'

@@ -101,7 +101,7 @@ export function AppHeader({
 
   // Notifications hook
   const notifications = useNotifications()
-  const { siteLanguage } = useSystemConfig()
+  const { siteLanguage, englishSiteUrl, chineseSiteUrl } = useSystemConfig()
 
   return (
     <>
@@ -132,14 +132,16 @@ export function AppHeader({
                 loading={notifications.loading}
               />
             )}
-            <a
-              href={siteLanguage === 'en' ? 'https://num.cc' : 'https://en.num.cc'}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-foreground/70 hover:text-foreground inline-flex h-9 items-center justify-center px-2 text-sm font-medium transition-colors'
-            >
-              {siteLanguage === 'en' ? 'Chinese' : 'English'}
-            </a>
+            {(siteLanguage === 'en' ? chineseSiteUrl : englishSiteUrl) && (
+              <a
+                href={siteLanguage === 'en' ? chineseSiteUrl : englishSiteUrl}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-foreground/70 hover:text-foreground inline-flex h-9 items-center justify-center px-2 text-sm font-medium transition-colors'
+              >
+                {siteLanguage === 'en' ? 'Chinese' : 'English'}
+              </a>
+            )}
             {showProfileDropdown && <ProfileDropdown />}
           </div>
         )}

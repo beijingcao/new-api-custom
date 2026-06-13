@@ -40,6 +40,8 @@ export interface CurrencyConfig {
 export interface SystemConfig {
   systemName: string
   siteLanguage: string
+  englishSiteUrl: string
+  chineseSiteUrl: string
   logo: string
   publicNavigationFontSize: number
   footerHtml?: string
@@ -76,6 +78,8 @@ export const useSystemConfigStore = create<SystemConfigState>()(
       config: {
         systemName: DEFAULT_SYSTEM_NAME,
         siteLanguage: 'zh',
+        englishSiteUrl: '',
+        chineseSiteUrl: '',
         logo: DEFAULT_LOGO,
         publicNavigationFontSize: 16,
         currency: { ...DEFAULT_CURRENCY_CONFIG },

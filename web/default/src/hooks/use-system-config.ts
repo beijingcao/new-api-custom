@@ -100,6 +100,8 @@ export function mapStatusDataToConfig(
   return {
     systemName: data.system_name || DEFAULT_SYSTEM_NAME,
     siteLanguage: (data.site_language as string) || 'zh',
+    englishSiteUrl: (data.english_site_url as string) || '',
+    chineseSiteUrl: (data.chinese_site_url as string) || '',
     logo: data.logo || DEFAULT_LOGO,
     publicNavigationFontSize: clampNumber(
       toNumber(data.public_navigation_font_size, 16),

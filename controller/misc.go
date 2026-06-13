@@ -64,6 +64,8 @@ func GetStatus(c *gin.Context) {
 		"theme":                       system_setting.GetThemeSettings().Frontend,
 		"system_name":                 common.SystemName,
 		"site_language":                common.SiteLanguage,
+		"english_site_url":             common.EnglishSiteUrl,
+		"chinese_site_url":             common.ChineseSiteUrl,
 		"logo":                        common.Logo,
 		"public_navigation_font_size": common.OptionMap["PublicNavigationFontSize"],
 		"footer_html":                 common.Footer,
