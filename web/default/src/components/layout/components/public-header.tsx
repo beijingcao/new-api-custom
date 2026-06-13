@@ -299,6 +299,7 @@ export function PublicHeader(props: PublicHeaderProps) {
                     <ProfileDropdown />
                   ) : (
                     <Button
+                      variant='outline'
                       size='sm'
                       className='h-8 rounded-lg px-3.5 font-medium'
                       style={publicNavTextStyle}
@@ -419,7 +420,7 @@ export function PublicHeader(props: PublicHeaderProps) {
               <Link
                 to={isAuthenticated ? '/dashboard' : '/sign-in'}
                 onClick={() => setMobileOpen(false)}
-                className='bg-foreground text-background inline-flex h-10 items-center justify-center rounded-lg font-medium transition-opacity hover:opacity-90 active:opacity-80'
+                className='border-border bg-background text-foreground inline-flex h-10 items-center justify-center rounded-lg border font-medium transition-colors hover:bg-muted'
                 style={publicNavTextStyle}
               >
                 {isAuthenticated ? t('Go to Dashboard') : t('Sign in')}
