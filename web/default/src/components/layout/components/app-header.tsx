@@ -18,8 +18,6 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useNotifications } from '@/hooks/use-notifications'
 import { useTopNavLinks } from '@/hooks/use-top-nav-links'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { LanguageSwitcher } from '@/components/language-switcher'
 import { NotificationPopover } from '@/components/notification-popover'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
@@ -81,11 +79,6 @@ type AppHeaderProps = {
    */
   showNotifications?: boolean
   /**
-   * Whether to show config drawer
-   * @default true
-   */
-  showConfigDrawer?: boolean
-  /**
    * Whether to show profile dropdown
    * @default true
    */
@@ -99,7 +92,6 @@ export function AppHeader({
   showSearch = true,
   rightContent,
   showNotifications = true,
-  showConfigDrawer = true,
   showProfileDropdown = true,
 }: AppHeaderProps) {
   // Prioritize dynamically generated links from backend
@@ -138,8 +130,14 @@ export function AppHeader({
                 loading={notifications.loading}
               />
             )}
-            <LanguageSwitcher />
-            {showConfigDrawer && <ConfigDrawer />}
+            <a
+              href='https://en.num.cc'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-foreground/70 hover:text-foreground inline-flex h-9 items-center justify-center px-2 text-sm font-medium transition-colors'
+            >
+              English
+            </a>
             {showProfileDropdown && <ProfileDropdown />}
           </div>
         )}
