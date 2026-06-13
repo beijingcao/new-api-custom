@@ -26,6 +26,9 @@ import {
 
 const defaultSiteSettings: SiteSettings = {
   'theme.frontend': 'default',
+  SiteLanguage: 'zh',
+  EnglishSiteUrl: '',
+  ChineseSiteUrl: '',
   Notice: '',
   SystemName: 'New API',
   Logo: '',
