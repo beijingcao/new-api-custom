@@ -405,6 +405,23 @@ export function PublicHeader(props: PublicHeaderProps) {
                 </Link>
               )
             })}
+            {showLanguageSwitcher && (siteLanguage === 'en' ? chineseSiteUrl : englishSiteUrl) && (
+              <a
+                href={siteLanguage === 'en' ? chineseSiteUrl : englishSiteUrl}
+                target='_blank'
+                rel='noopener noreferrer'
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  'text-muted-foreground flex items-center gap-3 py-3 text-base font-medium tracking-tight transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
+                  mobileOpen
+                    ? 'translate-y-0 opacity-100'
+                    : 'translate-y-4 opacity-0'
+                )}
+                style={{ transitionDelay: mobileOpen ? `${100 + links.length * 50}ms` : '0ms' }}
+              >
+                {siteLanguage === 'en' ? 'Chinese' : 'English'}
+              </a>
+            )}
           </nav>
 
           <div
