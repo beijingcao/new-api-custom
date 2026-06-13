@@ -36,11 +36,22 @@ export async function loadLocale(lng: string): Promise<void> {
   i18n.addResourceBundle(lng, 'translation', mod.default, true, true)
 }
 
+function getCachedSiteLanguage(): string {
+  try {
+    const raw = localStorage.getItem('status')
+    if (raw) {
+      const s = JSON.parse(raw)
+      if (s.site_language === 'en') return 'en'
+    }
+  } catch { /* empty */ }
+  return 'zh'
+}
+
 i18n
   .use(initReactI18next)
   .init({
     resources: { zh, en },
-    lng: 'zh',
+    lng: getCachedSiteLanguage(),
     fallbackLng: 'en',
     supportedLngs: ['en', 'zh', 'fr', 'ru', 'ja', 'vi'],
     load: 'languageOnly',
