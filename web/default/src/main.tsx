@@ -124,12 +124,15 @@ const rootElement = document.getElementById('root')!
       ) as HTMLMetaElement | null
       if (metaTitle) metaTitle.setAttribute('content', name)
     }
+    const resolveName = (s: Record<string, unknown>) =>
+      (s.system_name as string) ||
+      (s.site_language === 'en' ? 'num.cc' : '星际智能 num.cc')
     // Cache-first
     try {
       const saved = localStorage.getItem('status')
       if (saved) {
         const s = JSON.parse(saved)
-        if (s?.system_name) apply(s.system_name)
+        apply(resolveName(s))
         if (s?.logo) applyFaviconToDom(s.logo)
       }
     } catch {
@@ -138,8 +141,8 @@ const rootElement = document.getElementById('root')!
     // Background refresh
     getStatus()
       .then((s) => {
-        if (s?.system_name) {
-          apply(s.system_name as string)
+        if (s) {
+          apply(resolveName(s as Record<string, unknown>))
           try {
             localStorage.setItem('status', JSON.stringify(s))
           } catch {

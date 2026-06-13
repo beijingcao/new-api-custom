@@ -22,6 +22,7 @@ For commercial licensing, please contact support@quantumnous.com
 
 // System Configuration Defaults
 export const DEFAULT_SYSTEM_NAME = '星际智能 num.cc'
+export const DEFAULT_SYSTEM_NAME_EN = 'num.cc'
 export const DEFAULT_LOGO = '/logo.png'
 
 // LocalStorage Keys
