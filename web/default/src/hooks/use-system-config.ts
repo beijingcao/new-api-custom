@@ -171,7 +171,7 @@ export function useSystemConfig(options: UseSystemConfigOptions = {}) {
       setLoading(true)
       const newConfig = await fetchSystemConfig()
       setConfig(newConfig)
-      if (newConfig.siteLanguage && !localStorage.getItem('i18nextLng')) {
+      if (newConfig.siteLanguage) {
         i18n.changeLanguage(newConfig.siteLanguage)
       }
     } catch (error) {
