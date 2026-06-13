@@ -25,7 +25,7 @@ import {
   type SystemConfig,
   DEFAULT_CURRENCY_CONFIG,
 } from '@/stores/system-config-store'
-import { DEFAULT_SYSTEM_NAME, DEFAULT_SYSTEM_NAME_EN, DEFAULT_LOGO } from '@/lib/constants'
+import { DEFAULT_SYSTEM_NAME, DEFAULT_SYSTEM_NAME_ZH, DEFAULT_LOGO } from '@/lib/constants'
 import { applyFaviconToDom } from '@/lib/dom-utils'
 
 interface UseSystemConfigOptions {
@@ -99,7 +99,7 @@ export function mapStatusDataToConfig(
 
   return {
     siteLanguage: (data.site_language as string) || 'zh',
-    systemName: data.system_name || ((data.site_language === 'en') ? DEFAULT_SYSTEM_NAME_EN : DEFAULT_SYSTEM_NAME),
+    systemName: data.system_name || ((data.site_language === 'zh') ? DEFAULT_SYSTEM_NAME_ZH : DEFAULT_SYSTEM_NAME),
     englishSiteUrl: (data.english_site_url as string) || '',
     chineseSiteUrl: (data.chinese_site_url as string) || '',
     logo: data.logo || DEFAULT_LOGO,

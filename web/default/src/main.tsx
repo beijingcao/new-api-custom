@@ -126,7 +126,7 @@ const rootElement = document.getElementById('root')!
     }
     const resolveName = (s: Record<string, unknown>) =>
       (s.system_name as string) ||
-      (s.site_language === 'en' ? 'num.cc' : '星际智能 num.cc')
+      (s.site_language === 'zh' ? '星际智能 num.cc' : 'num.cc')
     // Cache-first
     try {
       const saved = localStorage.getItem('status')
