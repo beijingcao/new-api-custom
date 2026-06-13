@@ -18,26 +18,28 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
-import en from './locales/en.json'
-import fr from './locales/fr.json'
-import ja from './locales/ja.json'
-import ru from './locales/ru.json'
-import vi from './locales/vi.json'
 import zh from './locales/zh.json'
+import en from './locales/en.json'
 
-export const resources = {
-  en,
-  zh,
-  fr,
-  ru,
-  ja,
-  vi,
-} as const
+const localeLoaders: Record<string, () => Promise<{ default: Record<string, string> }>> = {
+  fr: () => import('./locales/fr.json'),
+  ja: () => import('./locales/ja.json'),
+  ru: () => import('./locales/ru.json'),
+  vi: () => import('./locales/vi.json'),
+}
+
+export async function loadLocale(lng: string): Promise<void> {
+  if (i18n.hasResourceBundle(lng, 'translation')) return
+  const loader = localeLoaders[lng]
+  if (!loader) return
+  const mod = await loader()
+  i18n.addResourceBundle(lng, 'translation', mod.default, true, true)
+}
 
 i18n
   .use(initReactI18next)
   .init({
-    resources,
+    resources: { zh, en },
     lng: 'zh',
     fallbackLng: 'en',
     supportedLngs: ['en', 'zh', 'fr', 'ru', 'ja', 'vi'],

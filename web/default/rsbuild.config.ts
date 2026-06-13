@@ -48,6 +48,27 @@ export default defineConfig(({ envMode }) => {
           priority: 0,
           enforce: true,
         },
+        'vendor-charts': {
+          test: /node_modules[\\/](@visactor|recharts|d3-)[\\/]/,
+          name: 'vendor-charts',
+          chunks: 'all',
+          priority: 0,
+          enforce: true,
+        },
+        'vendor-icons': {
+          test: /node_modules[\\/](lucide-react|@hugeicons)[\\/]/,
+          name: 'vendor-icons',
+          chunks: 'all',
+          priority: 0,
+          enforce: true,
+        },
+        'vendor-lobe-icons': {
+          test: /node_modules[\\/]@lobehub[\\/]icons[\\/]/,
+          name: 'vendor-lobe-icons',
+          chunks: 'all',
+          priority: 10,
+          enforce: true,
+        },
       },
     },
     source: {

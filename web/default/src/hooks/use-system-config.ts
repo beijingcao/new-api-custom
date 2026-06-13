@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useEffect, useCallback } from 'react'
-import i18n from '@/i18n/config'
+import i18n, { loadLocale } from '@/i18n/config'
 import {
   useSystemConfigStore,
   type CurrencyConfig,
@@ -172,6 +172,7 @@ export function useSystemConfig(options: UseSystemConfigOptions = {}) {
       const newConfig = await fetchSystemConfig()
       setConfig(newConfig)
       if (newConfig.siteLanguage) {
+        await loadLocale(newConfig.siteLanguage)
         i18n.changeLanguage(newConfig.siteLanguage)
       }
     } catch (error) {
