@@ -87,6 +87,32 @@ func GetInvoicedOrderIds(userId int) ([]string, error) {
 	return allIds, nil
 }
 
+// GetInvoicedOrderStatuses returns a map of order trade_no -> invoice request status
+// ("pending" while awaiting admin processing, "completed" once the admin has issued
+// the invoice). When an order appears in multiple requests, "completed" wins.
+func GetInvoicedOrderStatuses(userId int) (map[string]string, error) {
+	var requests []InvoiceRequest
+	err := DB.Select("order_ids, status").Where("user_id = ?", userId).Find(&requests).Error
+	if err != nil {
+		return nil, err
+	}
+
+	statuses := make(map[string]string)
+	for _, r := range requests {
+		var ids []string
+		if e := common.UnmarshalJsonStr(r.OrderIds, &ids); e != nil {
+			continue
+		}
+		for _, id := range ids {
+			if statuses[id] == "completed" {
+				continue
+			}
+			statuses[id] = r.Status
+		}
+	}
+	return statuses, nil
+}
+
 func GetAllInvoiceRequests(pageInfo *common.PageInfo) (results []InvoiceRequestDetail, total int64, err error) {
 	err = DB.Model(&InvoiceRequest{}).Count(&total).Error
 	if err != nil {

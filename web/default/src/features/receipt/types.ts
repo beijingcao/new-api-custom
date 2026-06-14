@@ -23,6 +23,7 @@ export interface InvoiceRequestsResponse {
   success: boolean
   data: InvoiceRequest[]
   invoiced_ids: string[]
+  invoiced_status: Record<string, string>
 }
 
 export interface TopupOrder {

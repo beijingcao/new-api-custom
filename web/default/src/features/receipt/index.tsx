@@ -24,7 +24,9 @@ export function Receipt() {
   const [total, setTotal] = useState(0)
   const pageSize = 20
 
-  const [invoicedIds, setInvoicedIds] = useState<Set<string>>(new Set())
+  const [invoicedStatus, setInvoicedStatus] = useState<Map<string, string>>(
+    new Map()
+  )
   const [submitting, setSubmitting] = useState(false)
 
   const fetchHeaders = useCallback(async () => {
@@ -63,8 +65,8 @@ export function Receipt() {
   const fetchInvoicedIds = useCallback(async () => {
     try {
       const res = await getInvoiceRequests()
-      if (res.success && res.invoiced_ids) {
-        setInvoicedIds(new Set(res.invoiced_ids))
+      if (res.success && res.invoiced_status) {
+        setInvoicedStatus(new Map(Object.entries(res.invoiced_status)))
       }
     } catch {
       // ignore
@@ -116,7 +118,7 @@ export function Receipt() {
           />
           <OrderListCard
             orders={orders}
-            invoicedIds={invoicedIds}
+            invoicedStatus={invoicedStatus}
             headers={headers}
             loading={ordersLoading}
             page={page}

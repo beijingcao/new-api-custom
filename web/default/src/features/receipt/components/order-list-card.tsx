@@ -20,7 +20,7 @@ import { InvoiceRequestDialog } from './invoice-request-dialog'
 
 interface OrderListCardProps {
   orders: TopupOrder[]
-  invoicedIds: Set<string>
+  invoicedStatus: Map<string, string>
   headers: InvoiceHeader[]
   loading: boolean
   page: number
@@ -33,7 +33,7 @@ interface OrderListCardProps {
 
 export function OrderListCard({
   orders,
-  invoicedIds,
+  invoicedStatus,
   headers,
   loading,
   page,
@@ -50,7 +50,7 @@ export function OrderListCard({
   const totalPages = Math.ceil(total / pageSize)
 
   const availableOrders = orders.filter(
-    (o) => o.status === 'success' && !invoicedIds.has(o.trade_no)
+    (o) => o.status === 'success' && !invoicedStatus.has(o.trade_no)
   )
 
   const allAvailableSelected =
@@ -146,7 +146,10 @@ export function OrderListCard({
 
             <div className='space-y-2'>
               {orders.map((order) => {
-                const isInvoiced = invoicedIds.has(order.trade_no)
+                const requestStatus = invoicedStatus.get(order.trade_no)
+                const isInvoiced = requestStatus === 'completed'
+                const isIssuing = requestStatus === 'pending'
+                const isLocked = isInvoiced || isIssuing
                 const isNotSuccess = order.status !== 'success'
                 const isSelected = selectedIds.has(order.trade_no)
 
@@ -156,7 +159,7 @@ export function OrderListCard({
                     className='hover:bg-muted/50 flex items-start gap-3 rounded-lg border p-3 transition-colors sm:p-4'
                   >
                     <div className='mt-0.5 shrink-0'>
-                      {isInvoiced ? (
+                      {isLocked ? (
                         <CheckCircle2 className='text-muted-foreground size-4' />
                       ) : isNotSuccess ? (
                         <div className='size-4' />
@@ -179,6 +182,13 @@ export function OrderListCard({
                           </div>
                         </div>
                         <div className='flex shrink-0 items-center gap-2'>
+                          {isIssuing && (
+                            <StatusBadge
+                              label={t('Issuing')}
+                              variant='warning'
+                              copyable={false}
+                            />
+                          )}
                           {isInvoiced && (
                             <StatusBadge
                               label={t('Invoiced')}

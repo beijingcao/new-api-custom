@@ -79,10 +79,12 @@ func GetInvoiceRequests(c *gin.Context) {
 		return
 	}
 	invoicedIds, _ := model.GetInvoicedOrderIds(userId)
+	invoicedStatus, _ := model.GetInvoicedOrderStatuses(userId)
 	c.JSON(http.StatusOK, gin.H{
-		"success":     true,
-		"data":        requests,
-		"invoiced_ids": invoicedIds,
+		"success":         true,
+		"data":            requests,
+		"invoiced_ids":    invoicedIds,
+		"invoiced_status": invoicedStatus,
 	})
 }
 
