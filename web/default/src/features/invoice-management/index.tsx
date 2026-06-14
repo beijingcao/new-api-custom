@@ -249,6 +249,12 @@ export function InvoiceManagement() {
         if (res.success && res.data) {
           setItems(res.data.items || [])
           setTotal(res.data.total)
+        } else {
+          // Surface the backend message so a query/permission error doesn't
+          // look like an empty list.
+          setItems([])
+          setTotal(0)
+          toast.error(res.message || t('Failed to load invoice requests'))
         }
       } catch {
         toast.error(t('Failed to load invoice requests'))
