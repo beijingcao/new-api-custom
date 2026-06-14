@@ -6,16 +6,31 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
+  Download,
   FileText,
+  Loader2,
+  Search,
 } from 'lucide-react'
 import { SectionPageLayout } from '@/components/layout'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import {
   getAdminInvoiceRequests,
   updateInvoiceRequest,
   type InvoiceRequestDetail,
 } from './api'
+import { downloadCsv } from './export-csv'
+
+const STATUS_ALL = 'all'
 
 function formatTime(ts: number): string {
   if (!ts) return '-'
@@ -214,11 +229,23 @@ export function InvoiceManagement() {
   const [total, setTotal] = useState(0)
   const pageSize = 20
 
+  // `keyword` is the live input value; `appliedKeyword` is what's actually
+  // filtering (applied on Search / Enter). `statusFilter` applies immediately.
+  const [keyword, setKeyword] = useState('')
+  const [appliedKeyword, setAppliedKeyword] = useState('')
+  const [statusFilter, setStatusFilter] = useState(STATUS_ALL)
+  const [exporting, setExporting] = useState(false)
+
   const fetchData = useCallback(
-    async (p: number) => {
+    async (p: number, kw: string, st: string) => {
       try {
         setLoading(true)
-        const res = await getAdminInvoiceRequests(p, pageSize)
+        const res = await getAdminInvoiceRequests(
+          p,
+          pageSize,
+          kw,
+          st === STATUS_ALL ? '' : st
+        )
         if (res.success && res.data) {
           setItems(res.data.items || [])
           setTotal(res.data.total)
@@ -233,13 +260,100 @@ export function InvoiceManagement() {
   )
 
   useEffect(() => {
-    fetchData(1)
+    fetchData(1, '', STATUS_ALL)
   }, [fetchData])
 
   const handlePageChange = (p: number) => {
     setPage(p)
-    fetchData(p)
+    fetchData(p, appliedKeyword, statusFilter)
   }
+
+  const handleSearch = () => {
+    setAppliedKeyword(keyword)
+    setPage(1)
+    fetchData(1, keyword, statusFilter)
+  }
+
+  const handleStatusChange = (value: string | null) => {
+    const st = value ?? STATUS_ALL
+    setStatusFilter(st)
+    setPage(1)
+    fetchData(1, appliedKeyword, st)
+  }
+
+  const handleExport = async () => {
+    setExporting(true)
+    try {
+      const all: InvoiceRequestDetail[] = []
+      const exportPageSize = 100
+      let p = 1
+      // Page through every record matching the current filters. Capped at
+      // 200 pages (20k rows) as a runaway safety net.
+      for (let i = 0; i < 200; i++) {
+        const res = await getAdminInvoiceRequests(
+          p,
+          exportPageSize,
+          appliedKeyword,
+          statusFilter === STATUS_ALL ? '' : statusFilter
+        )
+        if (!res.success || !res.data) break
+        all.push(...(res.data.items || []))
+        if (
+          all.length >= res.data.total ||
+          (res.data.items || []).length < exportPageSize
+        ) {
+          break
+        }
+        p += 1
+      }
+
+      if (all.length === 0) {
+        toast.info(t('No invoice requests'))
+        return
+      }
+
+      const headers = [
+        t('ID'),
+        t('User'),
+        t('Company'),
+        t('Tax Number'),
+        t('Bank'),
+        t('Bank Account'),
+        t('Email'),
+        t('Order Numbers'),
+        t('Total Amount'),
+        t('Status'),
+        t('Note'),
+        t('Submit Time'),
+      ]
+      const rows = all.map((item) => [
+        item.id,
+        item.username || `User ${item.user_id}`,
+        item.header?.company_name ?? '',
+        item.header?.tax_number ?? '',
+        item.header?.bank_name ?? '',
+        item.header?.bank_account ?? '',
+        item.header?.email ?? '',
+        parseOrderIds(item.order_ids).join('; '),
+        item.total_amount.toFixed(2),
+        item.status === 'completed' ? t('Invoiced') : t('Pending'),
+        item.note ?? '',
+        formatTime(item.created_at),
+      ])
+      downloadCsv(`invoices_${Date.now()}.csv`, headers, rows)
+      toast.success(t('Export successful'))
+    } catch {
+      toast.error(t('Export failed'))
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  const statusItems = [
+    { value: STATUS_ALL, label: t('All') },
+    { value: 'pending', label: t('Pending') },
+    { value: 'completed', label: t('Invoiced') },
+  ]
 
   const totalPages = Math.ceil(total / pageSize)
 
@@ -250,6 +364,62 @@ export function InvoiceManagement() {
       </SectionPageLayout.Title>
       <SectionPageLayout.Content>
         <div className='mx-auto flex w-full max-w-4xl flex-col gap-4'>
+          <div className='flex flex-col gap-2 sm:flex-row sm:items-center'>
+            <div className='flex flex-1 items-center gap-2'>
+              <Input
+                placeholder={t('Search by company or order number')}
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSearch()
+                }}
+              />
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={handleSearch}
+                className='shrink-0 gap-1.5'
+              >
+                <Search className='h-4 w-4' />
+                {t('Search')}
+              </Button>
+            </div>
+            <div className='flex items-center gap-2'>
+              <Select
+                items={statusItems}
+                value={statusFilter}
+                onValueChange={handleStatusChange}
+              >
+                <SelectTrigger className='w-36'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent alignItemWithTrigger={false}>
+                  <SelectGroup>
+                    {statusItems.map((it) => (
+                      <SelectItem key={it.value} value={it.value}>
+                        {it.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={handleExport}
+                disabled={exporting}
+                className='shrink-0 gap-1.5'
+              >
+                {exporting ? (
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                ) : (
+                  <Download className='h-4 w-4' />
+                )}
+                {t('Export to Excel')}
+              </Button>
+            </div>
+          </div>
+
           {loading ? (
             <div className='text-muted-foreground py-12 text-center text-sm'>
               {t('Loading...')}
@@ -265,7 +435,9 @@ export function InvoiceManagement() {
                   <InvoiceCard
                     key={item.id}
                     item={item}
-                    onUpdate={() => fetchData(page)}
+                    onUpdate={() =>
+                      fetchData(page, appliedKeyword, statusFilter)
+                    }
                   />
                 ))}
               </div>

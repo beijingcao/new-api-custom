@@ -113,17 +113,30 @@ func GetInvoicedOrderStatuses(userId int) (map[string]string, error) {
 	return statuses, nil
 }
 
-func GetAllInvoiceRequests(pageInfo *common.PageInfo) (results []InvoiceRequestDetail, total int64, err error) {
-	err = DB.Model(&InvoiceRequest{}).Count(&total).Error
-	if err != nil {
-		return nil, 0, err
+// filteredInvoiceRequestQuery builds a fresh query scoped by an optional status
+// filter and an optional keyword. The keyword matches either an order trade_no
+// inside the JSON-encoded order_ids column, or a company name on the related
+// invoice_headers row (resolved via a sub-query so it stays a single, fully
+// cross-database SQL statement). A fresh *gorm.DB is returned on every call so
+// the same conditions can be reused for an independent Count and Find without
+// statement-state leaking between them.
+func filteredInvoiceRequestQuery(keyword, status string) *gorm.DB {
+	query := DB.Model(&InvoiceRequest{})
+	if status != "" {
+		query = query.Where("status = ?", status)
 	}
+	if keyword != "" {
+		like := "%" + keyword + "%"
+		headerSub := DB.Model(&InvoiceHeader{}).Select("id").Where("company_name LIKE ?", like)
+		query = query.Where("order_ids LIKE ? OR header_id IN (?)", like, headerSub)
+	}
+	return query
+}
 
-	var requests []InvoiceRequest
-	err = DB.Order("id desc").Limit(pageInfo.GetPageSize()).Offset(pageInfo.GetStartIdx()).Find(&requests).Error
-	if err != nil {
-		return nil, 0, err
-	}
+// enrichInvoiceRequests attaches the username and invoice header to each request
+// using batched lookups (avoids N+1 queries).
+func enrichInvoiceRequests(requests []InvoiceRequest) []InvoiceRequestDetail {
+	results := make([]InvoiceRequestDetail, 0, len(requests))
 
 	userIds := make([]int, 0, len(requests))
 	headerIds := make([]int, 0, len(requests))
@@ -157,7 +170,24 @@ func GetAllInvoiceRequests(pageInfo *common.PageInfo) (results []InvoiceRequestD
 			Header:         headerMap[r.HeaderId],
 		})
 	}
-	return results, total, nil
+	return results
+}
+
+func GetAllInvoiceRequests(keyword, status string, pageInfo *common.PageInfo) (results []InvoiceRequestDetail, total int64, err error) {
+	if err = filteredInvoiceRequestQuery(keyword, status).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	var requests []InvoiceRequest
+	if err = filteredInvoiceRequestQuery(keyword, status).
+		Order("id desc").
+		Limit(pageInfo.GetPageSize()).
+		Offset(pageInfo.GetStartIdx()).
+		Find(&requests).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return enrichInvoiceRequests(requests), total, nil
 }
 
 func UpdateInvoiceRequestStatus(id int, status string, note string) error {

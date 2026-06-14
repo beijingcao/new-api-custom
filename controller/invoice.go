@@ -147,8 +147,10 @@ func CreateInvoiceRequest(c *gin.Context) {
 // Admin endpoints
 
 func AdminGetInvoiceRequests(c *gin.Context) {
+	keyword := c.Query("keyword")
+	status := c.Query("status")
 	pageInfo := common.GetPageQuery(c)
-	results, total, err := model.GetAllInvoiceRequests(pageInfo)
+	results, total, err := model.GetAllInvoiceRequests(keyword, status, pageInfo)
 	if err != nil {
 		common.ApiError(c, err)
 		return

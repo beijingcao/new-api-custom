@@ -33,12 +33,16 @@ interface PageResult {
 
 export async function getAdminInvoiceRequests(
   page: number,
-  pageSize: number
+  pageSize: number,
+  keyword?: string,
+  status?: string
 ): Promise<{ success: boolean; data?: PageResult; message?: string }> {
   const params = new URLSearchParams({
     p: page.toString(),
     page_size: pageSize.toString(),
   })
+  if (keyword) params.set('keyword', keyword)
+  if (status) params.set('status', status)
   const res = await api.get(`/api/invoice/admin/requests?${params.toString()}`)
   return res.data
 }
