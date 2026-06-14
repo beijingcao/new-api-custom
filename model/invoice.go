@@ -23,7 +23,14 @@ type InvoiceRequest struct {
 	OrderIds    string  `json:"order_ids" gorm:"type:text"`
 	TotalAmount float64 `json:"total_amount"`
 	Status      string  `json:"status" gorm:"type:varchar(20);default:'pending'"`
+	Note        string  `json:"note" gorm:"type:text"`
 	CreatedAt   int64   `json:"created_at" gorm:"autoCreateTime"`
+}
+
+type InvoiceRequestDetail struct {
+	InvoiceRequest
+	Username    string         `json:"username"`
+	Header      *InvoiceHeader `json:"header"`
 }
 
 func GetInvoiceHeadersByUserId(userId int) (headers []InvoiceHeader, err error) {
@@ -78,4 +85,58 @@ func GetInvoicedOrderIds(userId int) ([]string, error) {
 		}
 	}
 	return allIds, nil
+}
+
+func GetAllInvoiceRequests(pageInfo *common.PageInfo) (results []InvoiceRequestDetail, total int64, err error) {
+	err = DB.Model(&InvoiceRequest{}).Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	var requests []InvoiceRequest
+	err = DB.Order("id desc").Limit(pageInfo.GetPageSize()).Offset(pageInfo.GetStartIdx()).Find(&requests).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	userIds := make([]int, 0, len(requests))
+	headerIds := make([]int, 0, len(requests))
+	for _, r := range requests {
+		userIds = append(userIds, r.UserId)
+		headerIds = append(headerIds, r.HeaderId)
+	}
+
+	userMap := make(map[int]string)
+	if len(userIds) > 0 {
+		var users []User
+		DB.Select("id, username").Where("id IN ?", userIds).Find(&users)
+		for _, u := range users {
+			userMap[u.Id] = u.Username
+		}
+	}
+
+	headerMap := make(map[int]*InvoiceHeader)
+	if len(headerIds) > 0 {
+		var headers []InvoiceHeader
+		DB.Where("id IN ?", headerIds).Find(&headers)
+		for i := range headers {
+			headerMap[headers[i].Id] = &headers[i]
+		}
+	}
+
+	for _, r := range requests {
+		results = append(results, InvoiceRequestDetail{
+			InvoiceRequest: r,
+			Username:       userMap[r.UserId],
+			Header:         headerMap[r.HeaderId],
+		})
+	}
+	return results, total, nil
+}
+
+func UpdateInvoiceRequestStatus(id int, status string, note string) error {
+	return DB.Model(&InvoiceRequest{}).Where("id = ?", id).Updates(map[string]interface{}{
+		"status": status,
+		"note":   note,
+	}).Error
 }

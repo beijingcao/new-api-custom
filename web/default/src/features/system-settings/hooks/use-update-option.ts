@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import i18next from 'i18next'
 import { toast } from 'sonner'
+import { loadLocale } from '@/i18n/config'
 import { updateSystemOption } from '../api'
 import type { UpdateOptionRequest } from '../types'
 
@@ -60,6 +61,11 @@ export function useUpdateOption() {
           } catch {
             /* empty */
           }
+        }
+
+        if (variables.key === 'SiteLanguage') {
+          const lang = String(variables.value)
+          loadLocale(lang).then(() => i18next.changeLanguage(lang))
         }
 
         toast.success(i18next.t('Setting updated successfully'))

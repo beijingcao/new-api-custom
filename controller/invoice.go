@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/model"
-	"github.com/QuantumNous/new-api/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -97,7 +95,7 @@ func CreateInvoiceRequest(c *gin.Context) {
 	}
 
 	// Verify header belongs to user
-	header, err := model.GetInvoiceHeaderById(req.HeaderId, userId)
+	_, err := model.GetInvoiceHeaderById(req.HeaderId, userId)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invoice header not found"})
 		return
@@ -118,7 +116,6 @@ func CreateInvoiceRequest(c *gin.Context) {
 
 	// Fetch orders to calculate total amount
 	var totalMoney float64
-	var orderDetails []string
 	for _, tradeNo := range req.OrderIds {
 		topUp := model.GetTopUpByTradeNo(tradeNo)
 		if topUp == nil || topUp.UserId != userId || topUp.Status != common.TopUpStatusSuccess {
@@ -126,7 +123,6 @@ func CreateInvoiceRequest(c *gin.Context) {
 			return
 		}
 		totalMoney += topUp.Money
-		orderDetails = append(orderDetails, fmt.Sprintf("- Order: %s, Amount: ¥%.2f", topUp.TradeNo, topUp.Money))
 	}
 
 	orderIdsJson, _ := common.Marshal(req.OrderIds)
@@ -143,30 +139,43 @@ func CreateInvoiceRequest(c *gin.Context) {
 		return
 	}
 
-	// Send notification to admin via their preferred channel
-	go func() {
-		subject := fmt.Sprintf("Invoice Request #%d", invoiceReq.Id)
-		content := fmt.Sprintf(`<h2>New Invoice Request</h2>
-<p><strong>Request ID:</strong> %d</p>
-<h3>Invoice Header</h3>
-<table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;">
-<tr><td><strong>Company</strong></td><td>%s</td></tr>
-<tr><td><strong>Tax Number</strong></td><td>%s</td></tr>
-<tr><td><strong>Bank</strong></td><td>%s</td></tr>
-<tr><td><strong>Bank Account</strong></td><td>%s</td></tr>
-<tr><td><strong>Email</strong></td><td>%s</td></tr>
-</table>
-<h3>Orders</h3>
-<pre>%s</pre>
-<p><strong>Total Amount: ¥%.2f</strong></p>`,
-			invoiceReq.Id,
-			header.CompanyName, header.TaxNumber,
-			header.BankName, header.BankAccount, header.Email,
-			strings.Join(orderDetails, "\n"),
-			totalMoney,
-		)
-		service.NotifyRootUser("invoice_request", subject, content)
-	}()
-
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": invoiceReq})
+}
+
+// Admin endpoints
+
+func AdminGetInvoiceRequests(c *gin.Context) {
+	pageInfo := common.GetPageQuery(c)
+	results, total, err := model.GetAllInvoiceRequests(pageInfo)
+	if err != nil {
+		common.ApiError(c, err)
+		return
+	}
+	pageInfo.SetTotal(int(total))
+	pageInfo.SetItems(results)
+	common.ApiSuccess(c, pageInfo)
+}
+
+type updateInvoiceStatusRequest struct {
+	Status string `json:"status" binding:"required,oneof=pending completed"`
+	Note   string `json:"note"`
+}
+
+func AdminUpdateInvoiceRequest(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid id"})
+		return
+	}
+	var req updateInvoiceStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid request: " + err.Error()})
+		return
+	}
+	if err := model.UpdateInvoiceRequestStatus(id, req.Status, req.Note); err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "ok"})
 }
