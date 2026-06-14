@@ -47,7 +47,8 @@ export function Receipt() {
         setOrdersLoading(true)
         const res = await getUserBillingHistory(p, pageSize)
         if (res.success && res.data) {
-          setOrders(res.data.items as unknown as TopupOrder[])
+          const allOrders = res.data.items as unknown as TopupOrder[]
+          setOrders(allOrders.filter((o) => o.status === 'success'))
           setTotal(res.data.total)
         }
       } catch {

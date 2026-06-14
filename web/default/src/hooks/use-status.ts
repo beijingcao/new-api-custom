@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
+import i18n, { loadLocale } from '@/i18n/config'
 import { useSystemConfigStore } from '@/stores/system-config-store'
 import { getStatus } from '@/lib/api'
 import type { SystemStatus } from '@/features/auth/types'
@@ -42,8 +43,13 @@ export function useStatus() {
       const status = await getStatus()
       try {
         if (status) {
+          const config = mapStatusDataToConfig(status)
           const { setConfig } = useSystemConfigStore.getState()
-          setConfig(mapStatusDataToConfig(status))
+          setConfig(config)
+          if (config.siteLanguage && config.siteLanguage !== i18n.language) {
+            await loadLocale(config.siteLanguage)
+            i18n.changeLanguage(config.siteLanguage)
+          }
         }
       } catch (err) {
         if (import.meta.env.DEV) {

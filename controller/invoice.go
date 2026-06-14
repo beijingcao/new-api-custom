@@ -8,6 +8,7 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/model"
+	"github.com/QuantumNous/new-api/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -142,17 +143,10 @@ func CreateInvoiceRequest(c *gin.Context) {
 		return
 	}
 
-	// Send email notification to admin
+	// Send notification to admin via their preferred channel
 	go func() {
-		adminUser := model.GetRootUser()
-		if adminUser == nil || adminUser.Email == "" {
-			common.SysLog("invoice request: no admin email configured")
-			return
-		}
-
 		subject := fmt.Sprintf("Invoice Request #%d", invoiceReq.Id)
-		content := fmt.Sprintf(`
-<h2>New Invoice Request</h2>
+		content := fmt.Sprintf(`<h2>New Invoice Request</h2>
 <p><strong>Request ID:</strong> %d</p>
 <h3>Invoice Header</h3>
 <table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;">
@@ -164,17 +158,14 @@ func CreateInvoiceRequest(c *gin.Context) {
 </table>
 <h3>Orders</h3>
 <pre>%s</pre>
-<p><strong>Total Amount: ¥%.2f</strong></p>
-`,
+<p><strong>Total Amount: ¥%.2f</strong></p>`,
 			invoiceReq.Id,
 			header.CompanyName, header.TaxNumber,
 			header.BankName, header.BankAccount, header.Email,
 			strings.Join(orderDetails, "\n"),
 			totalMoney,
 		)
-		if err := common.SendEmail(subject, adminUser.Email, content); err != nil {
-			common.SysLog(fmt.Sprintf("invoice request email failed: %s", err.Error()))
-		}
+		service.NotifyRootUser("invoice_request", subject, content)
 	}()
 
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": invoiceReq})
