@@ -18,10 +18,39 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
-import zh from './locales/zh.json'
-import en from './locales/en.json'
+import zhRaw from './locales/zh.json'
+import enRaw from './locales/en.json'
 
-const localeLoaders: Record<string, () => Promise<{ default: Record<string, string> }>> = {
+/**
+ * Normalize a locale module into the flat key→value map that i18next expects
+ * under a namespace.
+ *
+ * i18next v26 strictly requires `resources[lng][namespace]`, so a translation
+ * map must live *under* the `translation` namespace, never be the namespace
+ * map itself. Our locale JSON files are unfortunately not uniform:
+ *   - en.json / zh.json are flat: `{ "Key": "Value" }`
+ *   - fr/ja/ru/vi.json are wrapped: `{ "translation": { "Key": "Value" } }`
+ * This helper accepts either shape and always returns the inner flat map, so
+ * callers can wrap it consistently. (A flat file with a literal "translation"
+ * string value is left untouched because we only unwrap object values.)
+ */
+function toTranslationBundle(
+  data: Record<string, unknown>
+): Record<string, string> {
+  const inner = data?.translation
+  if (inner && typeof inner === 'object') {
+    return inner as Record<string, string>
+  }
+  return data as Record<string, string>
+}
+
+const zh = toTranslationBundle(zhRaw as Record<string, unknown>)
+const en = toTranslationBundle(enRaw as Record<string, unknown>)
+
+const localeLoaders: Record<
+  string,
+  () => Promise<{ default: Record<string, unknown> }>
+> = {
   fr: () => import('./locales/fr.json'),
   ja: () => import('./locales/ja.json'),
   ru: () => import('./locales/ru.json'),
@@ -33,7 +62,13 @@ export async function loadLocale(lng: string): Promise<void> {
   const loader = localeLoaders[lng]
   if (!loader) return
   const mod = await loader()
-  i18n.addResourceBundle(lng, 'translation', mod.default, true, true)
+  i18n.addResourceBundle(
+    lng,
+    'translation',
+    toTranslationBundle(mod.default),
+    true,
+    true
+  )
 }
 
 function getCachedSiteLanguage(): string {
@@ -50,7 +85,10 @@ function getCachedSiteLanguage(): string {
 i18n
   .use(initReactI18next)
   .init({
-    resources: { zh, en },
+    resources: {
+      zh: { translation: zh },
+      en: { translation: en },
+    },
     lng: getCachedSiteLanguage(),
     fallbackLng: 'en',
     supportedLngs: ['en', 'zh', 'fr', 'ru', 'ja', 'vi'],
