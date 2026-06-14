@@ -112,6 +112,13 @@ func SetApiRouter(router *gin.Engine) {
 				selfRoute.POST("/aff_transfer", controller.TransferAffQuota)
 				selfRoute.PUT("/setting", controller.UpdateUserSetting)
 
+				// Invoice routes
+				selfRoute.GET("/invoice/headers", controller.GetInvoiceHeaders)
+				selfRoute.POST("/invoice/header", controller.CreateInvoiceHeader)
+				selfRoute.DELETE("/invoice/header/:id", controller.DeleteInvoiceHeader)
+				selfRoute.GET("/invoice/requests", controller.GetInvoiceRequests)
+				selfRoute.POST("/invoice/request", controller.CreateInvoiceRequest)
+
 				// 2FA routes
 				selfRoute.GET("/2fa/status", controller.Get2FAStatus)
 				selfRoute.POST("/2fa/setup", controller.Setup2FA)

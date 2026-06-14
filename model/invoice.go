@@ -1,0 +1,81 @@
+package model
+
+import (
+	"github.com/QuantumNous/new-api/common"
+	"gorm.io/gorm"
+)
+
+type InvoiceHeader struct {
+	Id          int    `json:"id" gorm:"primaryKey;autoIncrement"`
+	UserId      int    `json:"user_id" gorm:"index"`
+	CompanyName string `json:"company_name" gorm:"type:varchar(255);not null"`
+	TaxNumber   string `json:"tax_number" gorm:"type:varchar(100);not null"`
+	BankName    string `json:"bank_name" gorm:"type:varchar(255)"`
+	BankAccount string `json:"bank_account" gorm:"type:varchar(100)"`
+	Email       string `json:"email" gorm:"type:varchar(255);not null"`
+	CreatedAt   int64  `json:"created_at" gorm:"autoCreateTime"`
+}
+
+type InvoiceRequest struct {
+	Id          int     `json:"id" gorm:"primaryKey;autoIncrement"`
+	UserId      int     `json:"user_id" gorm:"index"`
+	HeaderId    int     `json:"header_id"`
+	OrderIds    string  `json:"order_ids" gorm:"type:text"`
+	TotalAmount float64 `json:"total_amount"`
+	Status      string  `json:"status" gorm:"type:varchar(20);default:'pending'"`
+	CreatedAt   int64   `json:"created_at" gorm:"autoCreateTime"`
+}
+
+func GetInvoiceHeadersByUserId(userId int) (headers []InvoiceHeader, err error) {
+	err = DB.Where("user_id = ?", userId).Order("id desc").Find(&headers).Error
+	return
+}
+
+func GetInvoiceHeaderById(id int, userId int) (*InvoiceHeader, error) {
+	var header InvoiceHeader
+	err := DB.Where("id = ? AND user_id = ?", id, userId).First(&header).Error
+	if err != nil {
+		return nil, err
+	}
+	return &header, nil
+}
+
+func CreateInvoiceHeader(header *InvoiceHeader) error {
+	return DB.Create(header).Error
+}
+
+func DeleteInvoiceHeader(id int, userId int) error {
+	result := DB.Where("id = ? AND user_id = ?", id, userId).Delete(&InvoiceHeader{})
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return result.Error
+}
+
+func GetInvoiceRequestsByUserId(userId int) (requests []InvoiceRequest, err error) {
+	err = DB.Where("user_id = ?", userId).Order("id desc").Find(&requests).Error
+	return
+}
+
+func CreateInvoiceRequest(request *InvoiceRequest) error {
+	return DB.Create(request).Error
+}
+
+// GetInvoicedOrderIds returns all order trade_no values that have been included in
+// any invoice request by the given user.
+func GetInvoicedOrderIds(userId int) ([]string, error) {
+	var requests []InvoiceRequest
+	err := DB.Select("order_ids").Where("user_id = ?", userId).Find(&requests).Error
+	if err != nil {
+		return nil, err
+	}
+
+	var allIds []string
+	for _, r := range requests {
+		var ids []string
+		if e := common.UnmarshalJsonStr(r.OrderIds, &ids); e == nil {
+			allIds = append(allIds, ids...)
+		}
+	}
+	return allIds, nil
+}
