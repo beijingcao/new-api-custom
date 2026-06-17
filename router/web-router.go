@@ -1,7 +1,9 @@
 package router
 
 import (
+	"bytes"
 	"embed"
+	"html"
 	"net/http"
 	"strings"
 
@@ -21,6 +23,29 @@ type ThemeAssets struct {
 	ClassicIndexPage []byte
 }
 
+// injectFavicon rewrites the favicon <link> tags inside the served index HTML
+// so they point at the admin-configured site Logo (common.Logo). Search-engine
+// crawlers and link-preview bots read the favicon from the raw HTML response
+// and do NOT execute the SPA's runtime favicon swap, so the static <link> tags
+// must already carry the correct URL — otherwise Google keeps showing the
+// bundled default icon. A fresh slice is always returned; the shared embedded
+// page bytes are never mutated. When no custom Logo is configured the page is
+// returned unchanged. common.Logo is updated live whenever the admin saves the
+// Logo option (see model/option.go), so no restart is required.
+func injectFavicon(page []byte) []byte {
+	logo := strings.TrimSpace(common.Logo)
+	if logo == "" || logo == "/logo.png" {
+		return page
+	}
+	href := []byte(`href="` + html.EscapeString(logo) + `"`)
+	// The default theme ships both a "/logo.png" and a build-injected
+	// "/favicon.ico" icon link; the classic theme ships only "/logo.png".
+	// Point every favicon reference at the configured logo.
+	page = bytes.ReplaceAll(page, []byte(`href="/logo.png"`), href)
+	page = bytes.ReplaceAll(page, []byte(`href="/favicon.ico"`), href)
+	return page
+}
+
 func SetWebRouter(router *gin.Engine, assets ThemeAssets) {
 	defaultFS := common.EmbedFolder(assets.DefaultBuildFS, "web/default/dist")
 	classicFS := common.EmbedFolder(assets.ClassicBuildFS, "web/classic/dist")
@@ -38,9 +63,9 @@ func SetWebRouter(router *gin.Engine, assets ThemeAssets) {
 		}
 		c.Header("Cache-Control", "no-cache")
 		if common.GetTheme() == "classic" {
-			c.Data(http.StatusOK, "text/html; charset=utf-8", assets.ClassicIndexPage)
+			c.Data(http.StatusOK, "text/html; charset=utf-8", injectFavicon(assets.ClassicIndexPage))
 		} else {
-			c.Data(http.StatusOK, "text/html; charset=utf-8", assets.DefaultIndexPage)
+			c.Data(http.StatusOK, "text/html; charset=utf-8", injectFavicon(assets.DefaultIndexPage))
 		}
 	})
 }
