@@ -1,6 +1,9 @@
 package model
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/QuantumNous/new-api/common"
 	"gorm.io/gorm"
 )
@@ -114,21 +117,33 @@ func GetInvoicedOrderStatuses(userId int) (map[string]string, error) {
 }
 
 // filteredInvoiceRequestQuery builds a fresh query scoped by an optional status
-// filter and an optional keyword. The keyword matches either an order trade_no
-// inside the JSON-encoded order_ids column, or a company name on the related
-// invoice_headers row (resolved via a sub-query so it stays a single, fully
-// cross-database SQL statement). A fresh *gorm.DB is returned on every call so
-// the same conditions can be reused for an independent Count and Find without
-// statement-state leaking between them.
+// filter and an optional keyword. The keyword matches any of:
+//   - an order trade_no inside the JSON-encoded order_ids column;
+//   - a company name on the related invoice_headers row (sub-query);
+//   - a username on the related users row (sub-query);
+//   - the numeric user_id, when the keyword is a bare integer.
+// The OR group is wrapped as a GORM group condition so it stays correctly
+// parenthesised when AND-ed with the status filter, and every clause uses
+// plain LIKE / IN sub-queries so the statement is fully cross-database. A
+// fresh *gorm.DB is returned on every call so the same conditions can be
+// reused for an independent Count and Find without statement-state leaking
+// between them.
 func filteredInvoiceRequestQuery(keyword, status string) *gorm.DB {
 	query := DB.Model(&InvoiceRequest{})
 	if status != "" {
 		query = query.Where("status = ?", status)
 	}
-	if keyword != "" {
+	if keyword = strings.TrimSpace(keyword); keyword != "" {
 		like := "%" + keyword + "%"
 		headerSub := DB.Model(&InvoiceHeader{}).Select("id").Where("company_name LIKE ?", like)
-		query = query.Where("order_ids LIKE ? OR header_id IN (?)", like, headerSub)
+		userSub := DB.Model(&User{}).Select("id").Where("username LIKE ?", like)
+		conds := DB.Where("order_ids LIKE ?", like).
+			Or("header_id IN (?)", headerSub).
+			Or("user_id IN (?)", userSub)
+		if uid, err := strconv.Atoi(keyword); err == nil {
+			conds = conds.Or("user_id = ?", uid)
+		}
+		query = query.Where(conds)
 	}
 	return query
 }

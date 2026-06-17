@@ -6,6 +6,7 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { cn } from '@/lib/utils'
 import { formatNumber } from '@/lib/format'
 import { formatTimestampToDate } from '@/lib/format'
 import { Button } from '@/components/ui/button'
@@ -144,7 +145,7 @@ export function OrderListCard({
               </div>
             )}
 
-            <div className='space-y-2'>
+            <div className='space-y-1.5'>
               {orders.map((order) => {
                 const requestStatus = invoicedStatus.get(order.trade_no)
                 const isInvoiced = requestStatus === 'completed'
@@ -156,9 +157,17 @@ export function OrderListCard({
                 return (
                   <div
                     key={order.id}
-                    className='hover:bg-muted/50 flex items-start gap-3 rounded-lg border p-3 transition-colors sm:p-4'
+                    className={cn(
+                      'flex items-center gap-3 rounded-lg border p-2.5 transition-colors sm:p-3',
+                      // Already-requested rows (issuing / invoiced) are locked
+                      // and grayed out so the eye lands on the still-selectable
+                      // orders above them.
+                      isLocked
+                        ? 'bg-muted/40 opacity-60'
+                        : 'hover:bg-muted/50'
+                    )}
                   >
-                    <div className='mt-0.5 shrink-0'>
+                    <div className='shrink-0'>
                       {isLocked ? (
                         <CheckCircle2 className='text-muted-foreground size-4' />
                       ) : isNotSuccess ? (
@@ -172,66 +181,49 @@ export function OrderListCard({
                     </div>
 
                     <div className='min-w-0 flex-1'>
-                      <div className='flex items-start justify-between gap-2'>
-                        <div className='space-y-1'>
-                          <code className='text-foreground truncate font-mono text-sm'>
-                            {order.trade_no}
-                          </code>
-                          <div className='text-muted-foreground text-xs'>
-                            {formatTimestampToDate(order.create_time)}
-                          </div>
-                        </div>
-                        <div className='flex shrink-0 items-center gap-2'>
-                          {isIssuing && (
-                            <StatusBadge
-                              label={t('Issuing')}
-                              variant='warning'
-                              copyable={false}
-                            />
-                          )}
-                          {isInvoiced && (
-                            <StatusBadge
-                              label={t('Invoiced')}
-                              variant='neutral'
-                              copyable={false}
-                            />
-                          )}
-                          {isNotSuccess && (
-                            <StatusBadge
-                              label={
-                                order.status === 'pending'
-                                  ? t('Pending')
-                                  : t('Expired')
-                              }
-                              variant={
-                                order.status === 'pending'
-                                  ? 'warning'
-                                  : 'danger'
-                              }
-                              copyable={false}
-                            />
-                          )}
-                        </div>
+                      <div className='flex items-center gap-2'>
+                        <code className='text-foreground truncate font-mono text-sm'>
+                          {order.trade_no}
+                        </code>
+                        {isIssuing && (
+                          <StatusBadge
+                            label={t('Issuing')}
+                            variant='warning'
+                            copyable={false}
+                          />
+                        )}
+                        {isInvoiced && (
+                          <StatusBadge
+                            label={t('Invoiced')}
+                            variant='neutral'
+                            copyable={false}
+                          />
+                        )}
+                        {isNotSuccess && (
+                          <StatusBadge
+                            label={
+                              order.status === 'pending'
+                                ? t('Pending')
+                                : t('Expired')
+                            }
+                            variant={
+                              order.status === 'pending' ? 'warning' : 'danger'
+                            }
+                            copyable={false}
+                          />
+                        )}
                       </div>
+                      <div className='text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-2 text-xs'>
+                        <span>{formatTimestampToDate(order.create_time)}</span>
+                        <span>·</span>
+                        <span>
+                          {getPaymentMethodName(order.payment_method, t)}
+                        </span>
+                      </div>
+                    </div>
 
-                      <div className='mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3'>
-                        <div className='space-y-0.5'>
-                          <div className='text-muted-foreground text-xs'>
-                            {t('Payment Method')}
-                          </div>
-                          <div className='text-sm'>
-                            {getPaymentMethodName(order.payment_method, t)}
-                          </div>
-                        </div>
-                        <div className='space-y-0.5'>
-                          <div className='text-muted-foreground text-xs'>
-                            {t('Payment')}
-                          </div>
-                          <div className='text-sm font-semibold'>
-                            ¥{formatNumber(order.money)}
-                          </div>
-                        </div>
-                      </div>
+                    <div className='shrink-0 text-sm font-semibold'>
+                      ¥{formatNumber(order.money)}
                     </div>
                   </div>
                 )

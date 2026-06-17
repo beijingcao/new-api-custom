@@ -12,6 +12,7 @@ import {
   Search,
 } from 'lucide-react'
 import { SectionPageLayout } from '@/components/layout'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -22,7 +23,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import {
   getAdminInvoiceRequests,
   updateInvoiceRequest,
@@ -94,125 +94,96 @@ function InvoiceCard({
     }
   }
 
+  // Completed (invoiced) requests are de-emphasised — grayed out with a neutral
+  // left border — so the admin's eye is drawn to the pending ones that still
+  // need action. Pending requests get an amber accent border.
+  const headerLine = item.header
+    ? [
+        item.header.company_name,
+        item.header.tax_number,
+        item.header.bank_name,
+        item.header.bank_account,
+        item.header.email,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : ''
+
   return (
-    <div className='bg-card border-border rounded-lg border p-4 shadow-sm'>
-      <div className='mb-3 flex items-center justify-between'>
-        <div className='flex items-center gap-2'>
-          <FileText className='text-muted-foreground h-4 w-4' />
-          <span className='text-sm font-medium'>
-            #{item.id} - {item.username || `User ${item.user_id}`}
+    <div
+      className={cn(
+        'rounded-lg border border-l-2 p-3 text-sm transition-colors',
+        isCompleted
+          ? 'border-l-muted-foreground/40 bg-muted/40 opacity-80'
+          : 'bg-card border-l-amber-400'
+      )}
+    >
+      <div className='flex flex-wrap items-center gap-x-3 gap-y-1'>
+        <FileText className='text-muted-foreground h-4 w-4 shrink-0' />
+        <span className='font-medium'>
+          #{item.id} · {item.username || `User ${item.user_id}`}
+        </span>
+        <span className='text-muted-foreground text-xs'>
+          ID {item.user_id}
+        </span>
+        <span className='font-semibold'>¥{item.total_amount.toFixed(2)}</span>
+        {isCompleted ? (
+          <span className='inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400'>
+            <Check className='h-3 w-3' />
+            {t('Invoiced')}
           </span>
-        </div>
-        <div className='flex items-center gap-2'>
-          {isCompleted ? (
-            <span className='inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400'>
-              <Check className='h-3 w-3' />
-              {t('Invoiced')}
-            </span>
-          ) : (
-            <span className='inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'>
-              <Clock className='h-3 w-3' />
-              {t('Pending')}
-            </span>
-          )}
-        </div>
+        ) : (
+          <span className='inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'>
+            <Clock className='h-3 w-3' />
+            {t('Pending')}
+          </span>
+        )}
+        <span className='text-muted-foreground ml-auto text-xs'>
+          {formatTime(item.created_at)}
+        </span>
       </div>
 
-      {item.header && (
-        <div className='bg-muted/50 mb-3 rounded-md p-3'>
-          <div className='mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground'>
-            {t('Invoice Header')}
-          </div>
-          <div className='grid grid-cols-1 gap-1.5 text-sm sm:grid-cols-2'>
-            <div>
-              <span className='text-muted-foreground'>{t('Company')}:</span>{' '}
-              {item.header.company_name}
-            </div>
-            <div>
-              <span className='text-muted-foreground'>{t('Tax Number')}:</span>{' '}
-              {item.header.tax_number}
-            </div>
-            {item.header.bank_name && (
-              <div>
-                <span className='text-muted-foreground'>{t('Bank')}:</span>{' '}
-                {item.header.bank_name}
-              </div>
-            )}
-            {item.header.bank_account && (
-              <div>
-                <span className='text-muted-foreground'>
-                  {t('Bank Account')}:
-                </span>{' '}
-                {item.header.bank_account}
-              </div>
-            )}
-            <div>
-              <span className='text-muted-foreground'>{t('Email')}:</span>{' '}
-              {item.header.email}
-            </div>
-          </div>
+      {headerLine && (
+        <div className='text-muted-foreground mt-1.5 text-xs leading-relaxed'>
+          {headerLine}
         </div>
       )}
-
-      <div className='mb-3 grid grid-cols-1 gap-1.5 text-sm sm:grid-cols-2'>
-        <div>
-          <span className='text-muted-foreground'>{t('Total Amount')}:</span>{' '}
-          <span className='font-medium'>¥{item.total_amount.toFixed(2)}</span>
-        </div>
-        <div>
-          <span className='text-muted-foreground'>{t('Submit Time')}:</span>{' '}
-          {formatTime(item.created_at)}
-        </div>
-      </div>
 
       {orderIds.length > 0 && (
-        <div className='mb-3'>
-          <div className='mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground'>
-            {t('Order Numbers')}
-          </div>
-          <div className='flex flex-wrap gap-1'>
-            {orderIds.map((oid) => (
-              <span
-                key={oid}
-                className='bg-muted rounded px-2 py-0.5 font-mono text-xs'
-              >
-                {oid}
-              </span>
-            ))}
-          </div>
+        <div className='mt-1.5 flex flex-wrap gap-1'>
+          {orderIds.map((oid) => (
+            <span
+              key={oid}
+              className='bg-muted rounded px-1.5 py-0.5 font-mono text-xs'
+            >
+              {oid}
+            </span>
+          ))}
         </div>
       )}
 
-      <div className='mb-3'>
-        <div className='mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground'>
-          {t('Note')}
-        </div>
-        <div className='flex gap-2'>
-          <Textarea
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder={t('Add a note...')}
-            rows={2}
-            className='text-sm'
-          />
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={handleSaveNote}
-            disabled={saving || note === (item.note || '')}
-            className='shrink-0 self-end'
-          >
-            {t('Save')}
-          </Button>
-        </div>
-      </div>
-
-      <div className='flex justify-end'>
+      <div className='mt-2 flex items-center gap-2'>
+        <Input
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder={t('Add a note...')}
+          className='h-8 text-xs'
+        />
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={handleSaveNote}
+          disabled={saving || note === (item.note || '')}
+          className='h-8 shrink-0'
+        >
+          {t('Save')}
+        </Button>
         <Button
           variant={isCompleted ? 'outline' : 'default'}
           size='sm'
           onClick={handleToggleStatus}
           disabled={saving}
+          className='h-8 shrink-0'
         >
           {isCompleted ? t('Mark as Pending') : t('Mark as Invoiced')}
         </Button>
@@ -373,7 +344,7 @@ export function InvoiceManagement() {
           <div className='flex flex-col gap-2 sm:flex-row sm:items-center'>
             <div className='flex flex-1 items-center gap-2'>
               <Input
-                placeholder={t('Search by company or order number')}
+                placeholder={t('Search by user ID, company, or order number')}
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
                 onKeyDown={(e) => {
@@ -436,7 +407,7 @@ export function InvoiceManagement() {
             </div>
           ) : (
             <>
-              <div className='flex flex-col gap-3'>
+              <div className='flex flex-col gap-2'>
                 {items.map((item) => (
                   <InvoiceCard
                     key={item.id}
