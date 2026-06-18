@@ -47,10 +47,9 @@ export function Receipt() {
     async (p: number) => {
       try {
         setOrdersLoading(true)
-        const res = await getUserBillingHistory(p, pageSize)
+        const res = await getUserBillingHistory(p, pageSize, undefined, 'success')
         if (res.success && res.data) {
-          const allOrders = res.data.items as unknown as TopupOrder[]
-          setOrders(allOrders.filter((o) => o.status === 'success'))
+          setOrders(res.data.items as unknown as TopupOrder[])
           setTotal(res.data.total)
         }
       } catch {
