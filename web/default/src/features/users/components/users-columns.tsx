@@ -37,6 +37,7 @@ import {
   USER_ROLES,
   isUserDeleted,
 } from '../constants'
+import { getUserSource, getUserSourceText } from '../source'
 import { type User } from '../types'
 import { DataTableRowActions } from './data-table-row-actions'
 
@@ -362,6 +363,35 @@ export function useUsersColumns(): ColumnDef<User>[] {
         )
       },
       size: 180,
+      meta: { mobileHidden: true },
+    },
+    {
+      id: 'source',
+      accessorFn: (user) => getUserSourceText(user, t),
+      header: t('Source'),
+      cell: ({ row }) => {
+        const source = getUserSource(row.original)
+        if (source.type === 'email') {
+          return (
+            <LongText className='max-w-[220px] text-sm'>
+              {source.value}
+            </LongText>
+          )
+        }
+        if (source.type === 'provider') {
+          return (
+            <StatusBadge
+              label={t(source.labelKey)}
+              variant='neutral'
+              copyable={false}
+              className='-ml-1.5'
+            />
+          )
+        }
+        return <span className='text-muted-foreground text-sm'>-</span>
+      },
+      size: 220,
+      enableSorting: false,
       meta: { mobileHidden: true },
     },
     {

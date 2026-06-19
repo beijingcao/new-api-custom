@@ -16,22 +16,56 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Plus } from 'lucide-react'
+import { useState } from 'react'
+import { Download, Loader2, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { exportUsersCsv } from '../export-users'
 import { useUsers } from './users-provider'
 
 export function UsersPrimaryButtons() {
   const { t } = useTranslation()
   const { setOpen, setCurrentRow } = useUsers()
+  const [exporting, setExporting] = useState(false)
 
   const handleCreate = () => {
     setCurrentRow(null)
     setOpen('create')
   }
 
+  const handleExport = async () => {
+    if (exporting) return
+    setExporting(true)
+    try {
+      const count = await exportUsersCsv(t)
+      if (count === 0) {
+        toast.info(t('No data to export'))
+      } else {
+        toast.success(t('Export successful'))
+      }
+    } catch {
+      toast.error(t('Export failed'))
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <div className='flex gap-2'>
+      <Button
+        variant='outline'
+        size='sm'
+        onClick={handleExport}
+        disabled={exporting}
+      >
+        {exporting ? (
+          <Loader2 className='h-4 w-4 animate-spin' />
+        ) : (
+          <Download className='h-4 w-4' />
+        )}
+        {exporting ? t('Exporting...') : t('Export')}
+      </Button>
       <Button size='sm' onClick={handleCreate}>
         <Plus className='h-4 w-4' />
         {t('Add User')}
