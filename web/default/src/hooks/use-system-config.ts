@@ -48,6 +48,9 @@ interface StatusApiResponse {
     custom_currency_symbol?: string
     custom_currency_exchange_rate?: number
     public_navigation_font_size?: number | string
+    site_language?: string
+    english_site_url?: string
+    chinese_site_url?: string
   }
 }
 
