@@ -108,6 +108,8 @@ func GetStatus(c *gin.Context) {
 
 		// 模块管理配置
 		"download_page":      common.OptionMap["DownloadPage"],
+		"umami_script_url":   common.OptionMap["UmamiScriptURL"],
+		"umami_website_id":   common.OptionMap["UmamiWebsiteID"],
 		"HeaderNavModules":    common.OptionMap["HeaderNavModules"],
 		"SidebarModulesAdmin": common.OptionMap["SidebarModulesAdmin"],
 

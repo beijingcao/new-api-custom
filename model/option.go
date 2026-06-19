@@ -67,6 +67,8 @@ func InitOptionMap() {
 	common.OptionMap["Notice"] = ""
 	common.OptionMap["About"] = ""
 	common.OptionMap["DownloadPage"] = ""
+	common.OptionMap["UmamiScriptURL"] = ""
+	common.OptionMap["UmamiWebsiteID"] = ""
 	common.OptionMap["HomePageContent"] = ""
 	common.OptionMap["Footer"] = common.Footer
 	common.OptionMap["SystemName"] = common.SystemName

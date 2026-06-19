@@ -36,6 +36,8 @@ const defaultSiteSettings: SiteSettings = {
   Footer: '',
   About: '',
   DownloadPage: '',
+  UmamiScriptURL: '',
+  UmamiWebsiteID: '',
   HomePageContent: '',
   ServerAddress: '',
   'legal.user_agreement': '',

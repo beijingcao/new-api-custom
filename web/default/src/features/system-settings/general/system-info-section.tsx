@@ -65,6 +65,8 @@ const _systemInfoSchema = z.object({
   Footer: z.string().optional(),
   About: z.string().optional(),
   DownloadPage: z.string().optional(),
+  UmamiScriptURL: z.string().url().optional().or(z.literal('')),
+  UmamiWebsiteID: z.string().optional(),
   HomePageContent: z.string().optional(),
   legal: z.object({
     user_agreement: z.string().optional(),
@@ -104,6 +106,8 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
     Footer: normalizeValue(defaultValues.Footer),
     About: normalizeValue(defaultValues.About),
     DownloadPage: normalizeValue(defaultValues.DownloadPage),
+    UmamiScriptURL: normalizeValue(defaultValues.UmamiScriptURL),
+    UmamiWebsiteID: normalizeValue(defaultValues.UmamiWebsiteID),
     HomePageContent: normalizeValue(defaultValues.HomePageContent),
     legal: {
       user_agreement: normalizeValue(defaultValues.legal?.user_agreement),
@@ -134,6 +138,8 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
     Footer: z.string().optional(),
     About: z.string().optional(),
     DownloadPage: z.string().optional(),
+    UmamiScriptURL: z.string().url().optional().or(z.literal('')),
+    UmamiWebsiteID: z.string().optional(),
     HomePageContent: z.string().optional(),
     legal: z.object({
       user_agreement: z.string().optional(),
@@ -455,6 +461,50 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
                     <FormDescription>
                       {t(
                         'When filled, a Downloads link appears in the navigation menu. Supports HTML, Markdown, or a URL for iframe embedding.'
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='UmamiScriptURL'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Umami Script URL')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='https://analytics.umami.is/script.js'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t(
+                        'URL of your Umami analytics script. Leave empty to disable tracking.'
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='UmamiWebsiteID'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Umami Website ID')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t(
+                        'Website ID from your Umami dashboard. Required together with the script URL.'
                       )}
                     </FormDescription>
                     <FormMessage />
