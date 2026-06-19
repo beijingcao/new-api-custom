@@ -85,10 +85,10 @@ export function useTopNavLinks(): TopNavLink[] {
     links.push({ title: t('Rankings'), href: '/rankings', requiresAuth })
   }
 
-  // Software Download (only shown when admin has configured content)
+  // Downloads (only shown when admin has configured content)
   const downloadPage = status?.download_page as string | undefined
   if (downloadPage && downloadPage.trim() !== '') {
-    links.push({ title: t('Software Download'), href: '/download' })
+    links.push({ title: t('Downloads'), href: '/download' })
   }
 
   // Docs (supports external links)

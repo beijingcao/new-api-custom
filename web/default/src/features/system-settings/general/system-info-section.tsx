@@ -442,7 +442,7 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
                 name='DownloadPage'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('Software Download')}</FormLabel>
+                    <FormLabel>{t('Downloads')}</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder={t(
@@ -454,7 +454,7 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
                     </FormControl>
                     <FormDescription>
                       {t(
-                        'When filled, a Software Download link appears in the navigation menu. Supports HTML, Markdown, or a URL for iframe embedding.'
+                        'When filled, a Downloads link appears in the navigation menu. Supports HTML, Markdown, or a URL for iframe embedding.'
                       )}
                     </FormDescription>
                     <FormMessage />
