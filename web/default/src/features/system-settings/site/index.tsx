@@ -35,6 +35,7 @@ const defaultSiteSettings: SiteSettings = {
   PublicNavigationFontSize: 16,
   Footer: '',
   About: '',
+  DownloadPage: '',
   HomePageContent: '',
   ServerAddress: '',
   'legal.user_agreement': '',

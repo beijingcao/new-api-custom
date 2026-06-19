@@ -107,6 +107,7 @@ func GetStatus(c *gin.Context) {
 		"faq_enabled":           cs.FAQEnabled,
 
 		// 模块管理配置
+		"download_page":      common.OptionMap["DownloadPage"],
 		"HeaderNavModules":    common.OptionMap["HeaderNavModules"],
 		"SidebarModulesAdmin": common.OptionMap["SidebarModulesAdmin"],
 
@@ -191,6 +192,17 @@ func GetAbout(c *gin.Context) {
 		"success": true,
 		"message": "",
 		"data":    common.OptionMap["About"],
+	})
+	return
+}
+
+func GetDownloadPage(c *gin.Context) {
+	common.OptionMapRWMutex.RLock()
+	defer common.OptionMapRWMutex.RUnlock()
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+		"data":    common.OptionMap["DownloadPage"],
 	})
 	return
 }

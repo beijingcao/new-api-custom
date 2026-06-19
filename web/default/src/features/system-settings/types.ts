@@ -67,6 +67,7 @@ export type SiteSettings = {
   PublicNavigationFontSize: number
   Footer: string
   About: string
+  DownloadPage: string
   HomePageContent: string
   ServerAddress: string
   'legal.user_agreement': string

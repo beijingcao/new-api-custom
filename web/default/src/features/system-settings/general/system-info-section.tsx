@@ -64,6 +64,7 @@ const _systemInfoSchema = z.object({
   PublicNavigationFontSize: z.coerce.number().min(10).max(24),
   Footer: z.string().optional(),
   About: z.string().optional(),
+  DownloadPage: z.string().optional(),
   HomePageContent: z.string().optional(),
   legal: z.object({
     user_agreement: z.string().optional(),
@@ -102,6 +103,7 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
     ),
     Footer: normalizeValue(defaultValues.Footer),
     About: normalizeValue(defaultValues.About),
+    DownloadPage: normalizeValue(defaultValues.DownloadPage),
     HomePageContent: normalizeValue(defaultValues.HomePageContent),
     legal: {
       user_agreement: normalizeValue(defaultValues.legal?.user_agreement),
@@ -131,6 +133,7 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
       }),
     Footer: z.string().optional(),
     About: z.string().optional(),
+    DownloadPage: z.string().optional(),
     HomePageContent: z.string().optional(),
     legal: z.object({
       user_agreement: z.string().optional(),
@@ -427,6 +430,31 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
                     <FormDescription>
                       {t(
                         'Supports HTML markup or iframe embedding. Enter HTML code directly, or provide a complete URL to automatically embed it as an iframe.'
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='DownloadPage'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Software Download')}</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder={t(
+                          'Enter HTML code or a URL for the download page. Leave empty to hide from navigation.'
+                        )}
+                        rows={4}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t(
+                        'When filled, a Software Download link appears in the navigation menu. Supports HTML, Markdown, or a URL for iframe embedding.'
                       )}
                     </FormDescription>
                     <FormMessage />

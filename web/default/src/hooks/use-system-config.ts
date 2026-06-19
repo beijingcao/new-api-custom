@@ -51,6 +51,7 @@ interface StatusApiResponse {
     site_language?: string
     english_site_url?: string
     chinese_site_url?: string
+    download_page?: string
   }
 }
 

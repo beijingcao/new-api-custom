@@ -47,6 +47,7 @@ const SITE_SECTIONS = [
           PublicNavigationFontSize: settings.PublicNavigationFontSize,
           Footer: settings.Footer,
           About: settings.About,
+          DownloadPage: settings.DownloadPage,
           HomePageContent: settings.HomePageContent,
           ServerAddress: settings.ServerAddress,
           legal: {
