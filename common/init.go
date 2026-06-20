@@ -98,7 +98,7 @@ func InitEnv() {
 	requestInterval, _ = strconv.Atoi(os.Getenv("POLLING_INTERVAL"))
 	RequestInterval = time.Duration(requestInterval) * time.Second
 
-	UserIDStart = GetEnvOrDefault("USER_ID_START", 0)
+	UserIDStart = GetEnvOrDefault("USER_ID_START", 21010)
 
 	// Initialize variables with GetEnvOrDefault
 	SyncFrequency = GetEnvOrDefault("SYNC_FREQUENCY", 60)
