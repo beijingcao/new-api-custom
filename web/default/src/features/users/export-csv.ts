@@ -17,32 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-/**
- * Build a CSV document from a header row + data rows and trigger a browser
- * download. A UTF-8 BOM is prepended so Excel / WPS open it with the correct
- * encoding (Chinese text otherwise shows as mojibake). Every field is quoted
- * and internal quotes are doubled, so commas / quotes / newlines in values are
- * safe. No third-party dependency is used.
- */
-function csvField(value: string | number | null | undefined): string {
-  const s = value == null ? '' : String(value)
-  return `"${s.replace(/"/g, '""')}"`
-}
-
-export function downloadCsv(
-  filename: string,
-  headers: string[],
-  rows: Array<Array<string | number | null | undefined>>
-): void {
-  const lines = [headers, ...rows].map((row) => row.map(csvField).join(','))
-  const csv = '﻿' + lines.join('\r\n')
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-}
+// The CSV builder/download helper now lives in @/lib/csv so it can be shared
+// across features (users export, wallet order-history export, …). Re-exported
+// here to preserve existing imports within the users feature.
+export { downloadCsv } from '@/lib/csv'

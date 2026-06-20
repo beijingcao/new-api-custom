@@ -17,8 +17,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useState } from 'react'
-import { Search, Copy, Check, ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  Search,
+  Copy,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Loader2,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { formatCurrencyFromUSD } from '@/lib/currency'
 import { formatNumber } from '@/lib/format'
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
@@ -48,6 +57,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog } from '@/components/dialog'
 import { StatusBadge } from '@/components/status-badge'
 import { useBillingHistory } from '../../hooks/use-billing-history'
+import { exportTopupOrdersCsv } from '../../export-topups'
 import {
   getStatusConfig,
   getPaymentMethodName,
@@ -80,9 +90,27 @@ export function BillingHistoryDialog({
   } = useBillingHistory()
 
   const [confirmTradeNo, setConfirmTradeNo] = useState<string | null>(null)
+  const [exporting, setExporting] = useState(false)
   const { copyToClipboard, copiedText } = useCopyToClipboard({ notify: false })
 
   const totalPages = Math.ceil(total / pageSize)
+
+  const handleExport = async () => {
+    if (exporting) return
+    setExporting(true)
+    try {
+      const count = await exportTopupOrdersCsv(t, keyword)
+      if (count === 0) {
+        toast.info(t('No data to export'))
+      } else {
+        toast.success(t('Export successful'))
+      }
+    } catch {
+      toast.error(t('Export failed'))
+    } finally {
+      setExporting(false)
+    }
+  }
 
   const handleConfirmComplete = async () => {
     if (confirmTradeNo) {
@@ -112,7 +140,11 @@ export function BillingHistoryDialog({
             <div className='relative flex-1'>
               <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
               <Input
-                placeholder={t('Search by order number...')}
+                placeholder={
+                  isAdmin
+                    ? t('Search by order number, user ID, or username...')
+                    : t('Search by order number...')
+                }
                 value={keyword}
                 onChange={(e) => handleSearch(e.target.value)}
                 className='h-9 pl-10'
@@ -142,6 +174,24 @@ export function BillingHistoryDialog({
                 </SelectGroup>
               </SelectContent>
             </Select>
+            {isAdmin && (
+              <Button
+                variant='outline'
+                size='sm'
+                className='h-9 shrink-0'
+                onClick={handleExport}
+                disabled={exporting}
+              >
+                {exporting ? (
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                ) : (
+                  <Download className='h-4 w-4' />
+                )}
+                <span className='max-sm:hidden'>
+                  {exporting ? t('Exporting...') : t('Export')}
+                </span>
+              </Button>
+            )}
           </div>
 
           {/* Records List */}
@@ -210,6 +260,14 @@ export function BillingHistoryDialog({
                                 variant='neutral'
                                 size='sm'
                                 copyText={String(record.user_id)}
+                              />
+                            )}
+                            {isAdmin && record.username && (
+                              <StatusBadge
+                                label={record.username}
+                                variant='neutral'
+                                size='sm'
+                                copyText={record.username}
                               />
                             )}
                           </div>

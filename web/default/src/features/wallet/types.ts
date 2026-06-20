@@ -262,6 +262,8 @@ export interface TopupRecord {
   id: number
   /** User ID */
   user_id: number
+  /** Username (admin list only; resolved via JOIN on the backend) */
+  username?: string
   /** Topup amount (quota) */
   amount: number
   /** Payment amount (actual money paid) */

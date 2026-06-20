@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/logger"
@@ -210,8 +211,17 @@ func GetUserTopUps(userId int, status string, pageInfo *common.PageInfo) (topups
 	return topups, total, nil
 }
 
-// GetAllTopUps 获取全平台的充值记录（管理员使用，不限制时间窗口）
-func GetAllTopUps(pageInfo *common.PageInfo) (topups []*TopUp, total int64, err error) {
+// TopUpWithUsername 是带用户名的充值记录，供管理员列表/搜索/导出使用。
+// Username 通过与 users 表 LEFT JOIN 获得，并非 TopUp 表自身字段。
+type TopUpWithUsername struct {
+	TopUp
+	Username string `json:"username" gorm:"column:username"`
+}
+
+// GetAdminTopUps 获取/搜索全平台充值记录（管理员使用，不限制时间窗口）。
+// keyword 为空时返回全部；否则按 订单号 / 用户名 模糊匹配，并在 keyword 为纯数字时
+// 额外按用户ID精确匹配。结果附带用户名（LEFT JOIN users）。
+func GetAdminTopUps(keyword string, pageInfo *common.PageInfo) (topups []*TopUpWithUsername, total int64, err error) {
 	tx := DB.Begin()
 	if tx.Error != nil {
 		return nil, 0, tx.Error
@@ -222,14 +232,39 @@ func GetAllTopUps(pageInfo *common.PageInfo) (topups []*TopUp, total int64, err 
 		}
 	}()
 
-	if err = tx.Model(&TopUp{}).Count(&total).Error; err != nil {
-		tx.Rollback()
-		return nil, 0, err
+	// LEFT JOIN 以便按用户名搜索并在结果中带出用户名；表名为 GORM 默认复数形式。
+	query := tx.Model(&TopUp{}).Joins("left join users on users.id = top_ups.user_id")
+
+	if keyword != "" {
+		pattern, perr := sanitizeLikePattern(keyword)
+		if perr != nil {
+			tx.Rollback()
+			return nil, 0, perr
+		}
+		// 订单号 / 用户名 模糊匹配；纯数字时额外匹配用户ID。
+		cond := "top_ups.trade_no LIKE ? ESCAPE '!' OR users.username LIKE ? ESCAPE '!'"
+		args := []interface{}{pattern, pattern}
+		if uid, convErr := strconv.Atoi(keyword); convErr == nil {
+			cond = "top_ups.user_id = ? OR " + cond
+			args = append([]interface{}{uid}, args...)
+		}
+		query = query.Where("("+cond+")", args...)
 	}
 
-	if err = tx.Order("id desc").Limit(pageInfo.GetPageSize()).Offset(pageInfo.GetStartIdx()).Find(&topups).Error; err != nil {
+	if err = query.Limit(searchTopUpCountHardLimit).Count(&total).Error; err != nil {
 		tx.Rollback()
-		return nil, 0, err
+		common.SysError("failed to count admin topups: " + err.Error())
+		return nil, 0, errors.New("查询充值记录失败")
+	}
+
+	if err = query.Select("top_ups.*, users.username as username").
+		Order("top_ups.id desc").
+		Limit(pageInfo.GetPageSize()).
+		Offset(pageInfo.GetStartIdx()).
+		Find(&topups).Error; err != nil {
+		tx.Rollback()
+		common.SysError("failed to query admin topups: " + err.Error())
+		return nil, 0, errors.New("查询充值记录失败")
 	}
 
 	if err = tx.Commit().Error; err != nil {
@@ -259,46 +294,6 @@ func SearchUserTopUps(userId int, keyword string, status string, pageInfo *commo
 	if status != "" {
 		query = query.Where("status = ?", status)
 	}
-	if keyword != "" {
-		pattern, perr := sanitizeLikePattern(keyword)
-		if perr != nil {
-			tx.Rollback()
-			return nil, 0, perr
-		}
-		query = query.Where("trade_no LIKE ? ESCAPE '!'", pattern)
-	}
-
-	if err = query.Limit(searchTopUpCountHardLimit).Count(&total).Error; err != nil {
-		tx.Rollback()
-		common.SysError("failed to count search topups: " + err.Error())
-		return nil, 0, errors.New("搜索充值记录失败")
-	}
-
-	if err = query.Order("id desc").Limit(pageInfo.GetPageSize()).Offset(pageInfo.GetStartIdx()).Find(&topups).Error; err != nil {
-		tx.Rollback()
-		common.SysError("failed to search topups: " + err.Error())
-		return nil, 0, errors.New("搜索充值记录失败")
-	}
-
-	if err = tx.Commit().Error; err != nil {
-		return nil, 0, err
-	}
-	return topups, total, nil
-}
-
-// SearchAllTopUps 按订单号搜索全平台充值记录（管理员使用，不限制时间窗口）
-func SearchAllTopUps(keyword string, pageInfo *common.PageInfo) (topups []*TopUp, total int64, err error) {
-	tx := DB.Begin()
-	if tx.Error != nil {
-		return nil, 0, tx.Error
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-
-	query := tx.Model(&TopUp{})
 	if keyword != "" {
 		pattern, perr := sanitizeLikePattern(keyword)
 		if perr != nil {
