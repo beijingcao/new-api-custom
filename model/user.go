@@ -384,6 +384,18 @@ func (user *User) TransferAffQuotaToQuota(quota int) error {
 	return tx.Commit().Error
 }
 
+func applyUserIDStart(user *User) {
+	start := common.UserIDStart
+	if start <= 1 || user.Id != 0 {
+		return
+	}
+	var maxId int
+	DB.Model(&User{}).Select("COALESCE(MAX(id), 0)").Scan(&maxId)
+	if maxId < start {
+		user.Id = start
+	}
+}
+
 func (user *User) Insert(inviterId int) error {
 	var err error
 	if user.Password != "" {
@@ -403,9 +415,16 @@ func (user *User) Insert(inviterId int) error {
 		user.SetSetting(defaultSetting)
 	}
 
+	applyUserIDStart(user)
 	result := DB.Create(user)
 	if result.Error != nil {
-		return result.Error
+		if user.Id == common.UserIDStart {
+			user.Id = 0
+			result = DB.Create(user)
+		}
+		if result.Error != nil {
+			return result.Error
+		}
 	}
 
 	// 用户创建成功后，根据角色初始化边栏配置
@@ -460,9 +479,16 @@ func (user *User) InsertWithTx(tx *gorm.DB, inviterId int) error {
 		user.SetSetting(defaultSetting)
 	}
 
+	applyUserIDStart(user)
 	result := tx.Create(user)
 	if result.Error != nil {
-		return result.Error
+		if user.Id == common.UserIDStart {
+			user.Id = 0
+			result = tx.Create(user)
+		}
+		if result.Error != nil {
+			return result.Error
+		}
 	}
 
 	return nil

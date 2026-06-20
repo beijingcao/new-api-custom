@@ -296,7 +296,29 @@ func migrateDB() error {
 			return err
 		}
 	}
+	ensureUserIDStart()
 	return nil
+}
+
+func ensureUserIDStart() {
+	start := common.UserIDStart
+	if start <= 1 {
+		return
+	}
+	var maxId int
+	if err := DB.Model(&User{}).Select("COALESCE(MAX(id), 0)").Scan(&maxId).Error; err != nil {
+		common.SysError(fmt.Sprintf("failed to check max user id: %s", err.Error()))
+		return
+	}
+	if maxId >= start {
+		return
+	}
+	if common.UsingMySQL {
+		DB.Exec(fmt.Sprintf("ALTER TABLE users AUTO_INCREMENT = %d", start))
+	} else if common.UsingPostgreSQL {
+		DB.Exec(fmt.Sprintf("SELECT setval(pg_get_serial_sequence('users', 'id'), %d, false)", start))
+	}
+	common.SysLog(fmt.Sprintf("user ID auto-increment start set to %d", start))
 }
 
 func migrateDBFast() error {
