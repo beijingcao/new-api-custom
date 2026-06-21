@@ -282,6 +282,17 @@ func SendEmailVerification(c *gin.Context) {
 			return
 		}
 	}
+	if common.EmailDomainBlacklistEnabled {
+		for _, domain := range common.EmailDomainBlacklist {
+			if domain != "" && domainPart == domain {
+				c.JSON(http.StatusOK, gin.H{
+					"success": false,
+					"message": "The administrator has enabled the email domain name blacklist, and your email address is not allowed to register.",
+				})
+				return
+			}
+		}
+	}
 	if common.EmailAliasRestrictionEnabled {
 		containsSpecialSymbols := strings.Contains(localPart, "+") || strings.Contains(localPart, ".")
 		if containsSpecialSymbols {

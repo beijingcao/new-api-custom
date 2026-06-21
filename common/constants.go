@@ -107,6 +107,8 @@ var EmailDomainWhitelist = []string{
 	"yahoo.com",
 	"foxmail.com",
 }
+var EmailDomainBlacklistEnabled = false // 是否启用邮箱域名黑名单
+var EmailDomainBlacklist = []string{}
 var EmailLoginAuthServerList = []string{
 	"smtp.sendcloud.net",
 	"smtp.azurecomm.net",
