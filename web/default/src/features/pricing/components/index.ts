@@ -23,9 +23,8 @@ export { ModelCardGrid } from './model-card-grid'
 export { LoadingSkeleton } from './loading-skeleton'
 export { EmptyState } from './empty-state'
 export { SearchBar } from './search-bar'
-export {
-  ModelDetails,
-  ModelDetailsContent,
-  ModelDetailsDrawer,
-} from './model-details'
+// Note: model-details (and its heavy charts dependency) is intentionally NOT
+// re-exported here. It is imported directly where needed — lazily in the
+// pricing list (index.tsx) and by the dedicated $modelId route — so it never
+// lands in the eager /pricing barrel chunk.
 export { PricingTable } from './pricing-table'

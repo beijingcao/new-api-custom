@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useCallback, useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PublicLayout } from '@/components/layout'
 import { PageTransition } from '@/components/page-transition'
@@ -28,8 +28,18 @@ import {
   PricingSidebar,
   PricingToolbar,
   ModelCardGrid,
-  ModelDetailsDrawer,
 } from './components'
+
+// The model details drawer (and its heavy charts dependency) is only rendered
+// after a user clicks a model, so it is lazy-loaded to keep it off the initial
+// /pricing payload.
+const ModelDetailsDrawer = lazy(() =>
+  import(
+    /* webpackChunkName: "pricing-model-details" */ './components/model-details'
+  ).then((m) => ({
+    default: m.ModelDetailsDrawer,
+  }))
+)
 import { EXCLUDED_GROUPS, VIEW_MODES } from './constants'
 import { useFilters } from './hooks/use-filters'
 import { usePricingData } from './hooks/use-pricing-data'
@@ -257,26 +267,28 @@ export function Pricing() {
           </div>
 
           {selectedModel && (
-            <ModelDetailsDrawer
-              open={Boolean(selectedModel)}
-              onOpenChange={(open) => {
-                if (!open) setSelectedModelName(null)
-              }}
-              model={selectedModel}
-              groupRatio={groupRatio || {}}
-              usableGroup={usableGroup || {}}
-              endpointMap={
-                (endpointMap as Record<
-                  string,
-                  { path?: string; method?: string }
-                >) || {}
-              }
-              autoGroups={autoGroups || []}
-              priceRate={priceRate ?? 1}
-              usdExchangeRate={usdExchangeRate ?? 1}
-              tokenUnit={tokenUnit}
-              showRechargePrice={showRechargePrice}
-            />
+            <Suspense fallback={null}>
+              <ModelDetailsDrawer
+                open={Boolean(selectedModel)}
+                onOpenChange={(open) => {
+                  if (!open) setSelectedModelName(null)
+                }}
+                model={selectedModel}
+                groupRatio={groupRatio || {}}
+                usableGroup={usableGroup || {}}
+                endpointMap={
+                  (endpointMap as Record<
+                    string,
+                    { path?: string; method?: string }
+                  >) || {}
+                }
+                autoGroups={autoGroups || []}
+                priceRate={priceRate ?? 1}
+                usdExchangeRate={usdExchangeRate ?? 1}
+                tokenUnit={tokenUnit}
+                showRechargePrice={showRechargePrice}
+              />
+            </Suspense>
           )}
         </PageTransition>
       </div>
