@@ -26,10 +26,12 @@ For commercial licensing, please contact support@quantumnous.com
  * - Size parameter: getLobeIcon("OpenAI", 20)
  *
  * Loading strategy: each provider lives in its own directory
- * (`@lobehub/icons/es/<Provider>`) and is imported on demand. We deliberately
- * avoid `import('@lobehub/icons')` (the whole namespace), which pulls every
- * provider logo (~900 kB) into a single chunk even when a page shows only a
- * handful. Per-provider imports mean a page downloads just the icons it renders.
+ * (`@lobehub/icons/es/<Provider>`) and is imported on demand via the
+ * `@lobe-icons` resolve alias (see rsbuild.config.ts). The alias turns the
+ * npm package path into a filesystem path so rspack can context-scan the
+ * directory. We deliberately avoid `import('@lobehub/icons')` (the whole
+ * namespace), which pulls every provider logo (~900 kB) into a single chunk.
+ * Per-provider imports mean a page downloads just the icons it renders.
  */
 import { useState, useEffect } from 'react'
 
@@ -44,14 +46,10 @@ function loadProvider(baseKey: string): Promise<unknown> {
   }
   let promise = providerPromises.get(baseKey)
   if (!promise) {
-    // webpackInclude restricts the generated context to the provider icon
-    // directories (PascalCase, depth 1) and excludes @lobehub/icons' lowercase
-    // helper dirs (components/features/hooks/types) — those pull optional, not-
-    // installed deps (dumi, svgo-browser) and would break the build.
     promise = import(
       /* webpackChunkName: "lobe-[request]" */
-      /* webpackInclude: /^(\.\/)?[A-Z][^/]*\/index\.js$/ */
-      `@lobehub/icons/es/${baseKey}/index.js`
+      /* webpackExclude: /\/(components|features|hooks|types)\// */
+      `@lobe-icons/${baseKey}/index.js`
     )
       .then((mod: { default?: unknown }) => {
         const def = mod?.default ?? null

@@ -76,6 +76,7 @@ export default defineConfig(({ envMode }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
+        '@lobe-icons': path.resolve(__dirname, 'node_modules/@lobehub/icons/es'),
       },
     },
     html: {
