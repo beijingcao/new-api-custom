@@ -19,6 +19,7 @@ var SiteLanguage = "zh"
 var EnglishSiteUrl = ""
 var ChineseSiteUrl = ""
 var Footer = ""
+var HeadScript = ""
 var Logo = ""
 var TopUpLink = ""
 

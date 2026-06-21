@@ -65,6 +65,7 @@ export type SiteSettings = {
   SystemName: string
   Logo: string
   PublicNavigationFontSize: number
+  HeadScript: string
   Footer: string
   About: string
   DownloadPage: string

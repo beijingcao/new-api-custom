@@ -38,6 +38,7 @@ interface StatusApiResponse {
   data: {
     system_name?: string
     logo?: string
+    head_script?: string
     footer_html?: string
     demo_site_enabled?: boolean
     display_token_stat_enabled?: boolean
@@ -112,6 +113,7 @@ export function mapStatusDataToConfig(
       10,
       24
     ),
+    headScript: data.head_script,
     footerHtml: data.footer_html,
     demoSiteEnabled: data.demo_site_enabled,
     displayTokenStatEnabled: data.display_token_stat_enabled,

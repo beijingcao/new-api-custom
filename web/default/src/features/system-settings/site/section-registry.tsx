@@ -45,6 +45,7 @@ const SITE_SECTIONS = [
           SystemName: settings.SystemName,
           Logo: settings.Logo,
           PublicNavigationFontSize: settings.PublicNavigationFontSize,
+          HeadScript: settings.HeadScript,
           Footer: settings.Footer,
           About: settings.About,
           DownloadPage: settings.DownloadPage,

@@ -62,6 +62,7 @@ const _systemInfoSchema = z.object({
   ServerAddress: z.string().optional(),
   Logo: z.string().url().optional().or(z.literal('')),
   PublicNavigationFontSize: z.coerce.number().min(10).max(24),
+  HeadScript: z.string().optional(),
   Footer: z.string().optional(),
   About: z.string().optional(),
   DownloadPage: z.string().optional(),
@@ -101,6 +102,7 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
     PublicNavigationFontSize: Number(
       defaultValues.PublicNavigationFontSize || 16
     ),
+    HeadScript: normalizeValue(defaultValues.HeadScript),
     Footer: normalizeValue(defaultValues.Footer),
     About: normalizeValue(defaultValues.About),
     DownloadPage: normalizeValue(defaultValues.DownloadPage),
@@ -131,6 +133,7 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
       .max(24, {
         error: () => t('Public navigation font size must be at most 24px'),
       }),
+    HeadScript: z.string().optional(),
     Footer: z.string().optional(),
     About: z.string().optional(),
     DownloadPage: z.string().optional(),
@@ -388,6 +391,32 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
                   </FormItem>
                 )}
               />
+
+              <SettingsFormGridItem span='full'>
+                <FormField
+                  control={form.control}
+                  name='HeadScript'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('Head Script')}</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder='<script>\nvar _hmt = _hmt || [];\n(function() {\n  var hm = document.createElement("script");\n  hm.src = "https://hm.baidu.com/hm.js?xxxxx";\n  var s = document.getElementsByTagName("script")[0];\n  s.parentNode.insertBefore(hm, s);\n})();\n</script>'
+                          rows={6}
+                          className='font-mono text-xs'
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {t(
+                          'Custom script tags injected into the page head. Supports analytics code such as Baidu, Google Analytics, Cloudflare Web Analytics, etc.'
+                        )}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </SettingsFormGridItem>
 
               <FormField
                 control={form.control}

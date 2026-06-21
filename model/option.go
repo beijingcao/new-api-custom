@@ -71,6 +71,7 @@ func InitOptionMap() {
 	common.OptionMap["DownloadPage"] = ""
 	common.OptionMap["HomePageContent"] = ""
 	common.OptionMap["Footer"] = common.Footer
+	common.OptionMap["HeadScript"] = common.HeadScript
 	common.OptionMap["SystemName"] = common.SystemName
 	common.OptionMap["SiteLanguage"] = common.SiteLanguage
 	common.OptionMap["EnglishSiteUrl"] = common.EnglishSiteUrl
@@ -510,6 +511,8 @@ func updateOptionMap(key string, value string) (err error) {
 		common.LinuxDOMinimumTrustLevel, _ = strconv.Atoi(value)
 	case "Footer":
 		common.Footer = value
+	case "HeadScript":
+		common.HeadScript = value
 	case "SystemName":
 		common.SystemName = value
 	case "SiteLanguage":

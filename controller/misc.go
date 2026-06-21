@@ -69,6 +69,7 @@ func GetStatus(c *gin.Context) {
 		"logo":                        common.Logo,
 		"public_navigation_font_size": common.OptionMap["PublicNavigationFontSize"],
 		"footer_html":                 common.Footer,
+		"head_script":                 common.HeadScript,
 		"wechat_qrcode":               common.WeChatAccountQRCodeImageURL,
 		"wechat_login":                common.WeChatAuthEnabled,
 		"server_address":              system_setting.ServerAddress,

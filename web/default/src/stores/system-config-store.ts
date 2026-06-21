@@ -44,6 +44,7 @@ export interface SystemConfig {
   chineseSiteUrl: string
   logo: string
   publicNavigationFontSize: number
+  headScript?: string
   footerHtml?: string
   demoSiteEnabled?: boolean
   displayTokenStatEnabled?: boolean

@@ -1922,6 +1922,8 @@
     "Font": "字体",
     "Footer": "页脚",
     "Footer text displayed at the bottom of pages": "显示在页面底部的页脚文本",
+    "Head Script": "头部脚本",
+    "Custom script tags injected into the page head. Supports analytics code such as Baidu, Google Analytics, Cloudflare Web Analytics, etc.": "注入页面头部的自定义脚本标签。支持百度统计、Google Analytics、Cloudflare Web Analytics 等统计代码。",
     "footer.columns.about.links.aboutProject": "关于项目",
     "footer.columns.about.links.contact": "联系我们",
     "footer.columns.about.links.features": "功能",
