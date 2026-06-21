@@ -67,8 +67,10 @@ func InitOptionMap() {
 	common.OptionMap["Notice"] = ""
 	common.OptionMap["About"] = ""
 	common.OptionMap["DownloadPage"] = ""
-	common.OptionMap["UmamiScriptURL"] = ""
-	common.OptionMap["UmamiWebsiteID"] = ""
+	// Default to the original tracking endpoint so analytics keep working out of
+	// the box after upgrades; admins can override or clear these in settings.
+	common.OptionMap["UmamiScriptURL"] = "https://umami-black-three.vercel.app/script.js"
+	common.OptionMap["UmamiWebsiteID"] = "57d36864-d9f1-4e6f-8a29-1d7d03abbb75"
 	common.OptionMap["HomePageContent"] = ""
 	common.OptionMap["Footer"] = common.Footer
 	common.OptionMap["SystemName"] = common.SystemName
