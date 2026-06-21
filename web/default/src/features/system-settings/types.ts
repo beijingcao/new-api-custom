@@ -68,8 +68,6 @@ export type SiteSettings = {
   Footer: string
   About: string
   DownloadPage: string
-  UmamiScriptURL: string
-  UmamiWebsiteID: string
   HomePageContent: string
   ServerAddress: string
   'legal.user_agreement': string

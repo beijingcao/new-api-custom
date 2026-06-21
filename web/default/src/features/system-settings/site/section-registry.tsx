@@ -48,8 +48,6 @@ const SITE_SECTIONS = [
           Footer: settings.Footer,
           About: settings.About,
           DownloadPage: settings.DownloadPage,
-          UmamiScriptURL: settings.UmamiScriptURL,
-          UmamiWebsiteID: settings.UmamiWebsiteID,
           HomePageContent: settings.HomePageContent,
           ServerAddress: settings.ServerAddress,
           legal: {
