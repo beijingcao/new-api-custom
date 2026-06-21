@@ -24,25 +24,50 @@ For commercial licensing, please contact support@quantumnous.com
  * - Basic: "OpenAI", "OpenAI.Color"
  * - Chained properties: "OpenAI.Avatar.type={'platform'}"
  * - Size parameter: getLobeIcon("OpenAI", 20)
+ *
+ * Loading strategy: each provider lives in its own directory
+ * (`@lobehub/icons/es/<Provider>`) and is imported on demand. We deliberately
+ * avoid `import('@lobehub/icons')` (the whole namespace), which pulls every
+ * provider logo (~900 kB) into a single chunk even when a page shows only a
+ * handful. Per-provider imports mean a page downloads just the icons it renders.
  */
 import { useState, useEffect } from 'react'
 
-let cachedModule: Record<string, unknown> | null = null
-let loadPromise: Promise<Record<string, unknown>> | null = null
+// baseKey -> provider default export (or null when the name is unknown/invalid).
+const providerCache = new Map<string, unknown>()
+// baseKey -> in-flight import promise (dedupes concurrent loads of the same provider).
+const providerPromises = new Map<string, Promise<unknown>>()
 
-function ensureLoaded(): Promise<Record<string, unknown>> {
-  if (cachedModule) return Promise.resolve(cachedModule)
-  if (!loadPromise) {
-    loadPromise = import('@lobehub/icons').then((mod) => {
-      cachedModule = mod as unknown as Record<string, unknown>
-      return cachedModule
-    })
+function loadProvider(baseKey: string): Promise<unknown> {
+  if (providerCache.has(baseKey)) {
+    return Promise.resolve(providerCache.get(baseKey))
   }
-  return loadPromise
+  let promise = providerPromises.get(baseKey)
+  if (!promise) {
+    // webpackInclude restricts the generated context to the provider icon
+    // directories (PascalCase, depth 1) and excludes @lobehub/icons' lowercase
+    // helper dirs (components/features/hooks/types) — those pull optional, not-
+    // installed deps (dumi, svgo-browser) and would break the build.
+    promise = import(
+      /* webpackChunkName: "lobe-[request]" */
+      /* webpackInclude: /^(\.\/)?[A-Z][^/]*\/index\.js$/ */
+      `@lobehub/icons/es/${baseKey}/index.js`
+    )
+      .then((mod: { default?: unknown }) => {
+        const def = mod?.default ?? null
+        providerCache.set(baseKey, def)
+        return def
+      })
+      .catch(() => {
+        // Unknown provider name (e.g. a custom vendor icon that has no logo) —
+        // cache the miss so we render the placeholder without retrying.
+        providerCache.set(baseKey, null)
+        return null
+      })
+    providerPromises.set(baseKey, promise)
+  }
+  return promise
 }
-
-// Start loading immediately when this module is first imported
-ensureLoaded()
 
 function parseValue(raw: string | undefined | null): string | number | boolean {
   if (raw == null) return true
@@ -80,25 +105,28 @@ function Placeholder({ name, size }: { name?: string; size: number }) {
   )
 }
 
+/**
+ * Render an icon from an already-loaded provider module. `baseIcon` is the
+ * provider's default export — the exact object the previous implementation read
+ * as `icons[baseKey]`, so name resolution (variants, chained props) is unchanged.
+ */
 function resolveIcon(
-  icons: Record<string, unknown>,
+  baseIcon: Record<string, unknown> | undefined,
   iconName: string,
   size: number
 ): React.ReactNode {
   const segments = iconName.split('.')
-  const baseKey = segments[0]
-  const BaseIcon = icons[baseKey] as Record<string, unknown> | undefined
 
   let IconComponent: React.ComponentType<Record<string, unknown>> | undefined
   let propStartIndex: number
 
-  if (BaseIcon && segments.length > 1 && BaseIcon[segments[1]]) {
-    IconComponent = BaseIcon[segments[1]] as React.ComponentType<
+  if (baseIcon && segments.length > 1 && baseIcon[segments[1]]) {
+    IconComponent = baseIcon[segments[1]] as React.ComponentType<
       Record<string, unknown>
     >
     propStartIndex = 2
   } else {
-    IconComponent = icons[baseKey] as
+    IconComponent = baseIcon as
       | React.ComponentType<Record<string, unknown>>
       | undefined
     propStartIndex = segments.length > 1 && /^[A-Z]/.test(segments[1]) ? 2 : 1
@@ -132,26 +160,33 @@ function resolveIcon(
   return <IconComponent {...props} />
 }
 
-function LazyLobeIcon({
-  iconName,
-  size,
-}: {
-  iconName: string
-  size: number
-}) {
-  const [icons, setIcons] = useState(cachedModule)
+function LazyLobeIcon({ iconName, size }: { iconName: string; size: number }) {
+  const baseKey = iconName.split('.')[0]
+  const [baseIcon, setBaseIcon] = useState<unknown>(() =>
+    providerCache.has(baseKey) ? providerCache.get(baseKey) : undefined
+  )
 
   useEffect(() => {
-    if (!cachedModule) {
-      ensureLoaded().then(setIcons)
+    if (providerCache.has(baseKey)) {
+      setBaseIcon(providerCache.get(baseKey))
+      return
     }
-  }, [])
+    // New provider not yet loaded — show the placeholder while it streams in.
+    setBaseIcon(undefined)
+    let alive = true
+    loadProvider(baseKey).then((def) => {
+      if (alive) setBaseIcon(def)
+    })
+    return () => {
+      alive = false
+    }
+  }, [baseKey])
 
-  if (!icons) {
+  if (!baseIcon) {
     return <Placeholder name={iconName} size={size} />
   }
 
-  return <>{resolveIcon(icons, iconName, size)}</>
+  return <>{resolveIcon(baseIcon as Record<string, unknown>, iconName, size)}</>
 }
 
 export function getLobeIcon(

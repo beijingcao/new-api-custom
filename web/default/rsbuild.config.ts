@@ -62,13 +62,10 @@ export default defineConfig(({ envMode }) => {
           priority: 0,
           enforce: true,
         },
-        'vendor-lobe-icons': {
-          test: /node_modules[\\/]@lobehub[\\/]icons[\\/]/,
-          name: 'vendor-lobe-icons',
-          chunks: 'all',
-          priority: 10,
-          enforce: true,
-        },
+        // NOTE: no `vendor-lobe-icons` cacheGroup. @lobehub/icons is imported
+        // per-provider on demand (see src/lib/lobe-icon.tsx); forcing all of
+        // them into a single enforced chunk would defeat that splitting and
+        // reload the entire ~900 kB icon set up front.
       },
     },
     source: {
