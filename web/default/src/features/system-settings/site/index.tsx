@@ -33,6 +33,7 @@ const defaultSiteSettings: SiteSettings = {
   SystemName: 'New API',
   Logo: '',
   PublicNavigationFontSize: 16,
+  HeadScript: '',
   Footer: '',
   About: '',
   DownloadPage: '',
