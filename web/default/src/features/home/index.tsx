@@ -28,11 +28,21 @@ import { useHomePageContent } from './hooks'
 // when a custom HomePageContent is configured (then it never renders).
 const DefaultHome = lazy(() => import('./components/default-home'))
 
+// Operator-authored home content can be a full HTML document whose styling
+// lives in inline <style>/<link> elements. That content must render as raw
+// HTML — exactly like the About/Download/Legal pages do — because routing it
+// through <Markdown> runs it through DOMPurify, which strips <style>/<link>
+// and leaves the page unstyled. Plain Markdown content still uses <Markdown>.
+function isLikelyHtml(value: string) {
+  return /<\/?[a-z][\s\S]*>/i.test(value)
+}
+
 export function Home() {
   const { t } = useTranslation()
   const { auth } = useAuthStore()
   const isAuthenticated = !!auth.user
   const { content, isLoaded, isUrl } = useHomePageContent()
+  const isHtml = !isUrl && isLikelyHtml(content)
 
   if (!isLoaded) {
     return (
@@ -56,7 +66,14 @@ export function Home() {
             />
           ) : (
             <div className='container mx-auto py-8'>
-              <Markdown className='custom-home-content'>{content}</Markdown>
+              {isHtml ? (
+                <div
+                  className='prose prose-neutral dark:prose-invert max-w-none custom-home-content'
+                  dangerouslySetInnerHTML={{ __html: content }}
+                />
+              ) : (
+                <Markdown className='custom-home-content'>{content}</Markdown>
+              )}
             </div>
           )}
         </main>
