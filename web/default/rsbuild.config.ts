@@ -1,10 +1,21 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { createRequire } from 'module'
 import { defineConfig, loadEnv } from '@rsbuild/core'
 import { pluginReact } from '@rsbuild/plugin-react'
 import { tanstackRouter } from '@tanstack/router-plugin/rspack'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// Resolve @lobehub/icons from wherever the package manager actually installs it
+// (web/default/node_modules, or the hoisted workspace-root web/node_modules).
+// A hardcoded node_modules path breaks when bun hoists the package to the root —
+// which is what happened when rc.15's lockfile update shifted the hoisting layout.
+const nodeRequire = createRequire(import.meta.url)
+const lobeIconsEsDir = path.join(
+  path.dirname(nodeRequire.resolve('@lobehub/icons/package.json')),
+  'es',
+)
 
 export default defineConfig(({ envMode }) => {
   const env = loadEnv({ mode: envMode, prefixes: ['VITE_'] })
@@ -76,7 +87,7 @@ export default defineConfig(({ envMode }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
-        '@lobe-icons': path.resolve(__dirname, 'node_modules/@lobehub/icons/es'),
+        '@lobe-icons': lobeIconsEsDir,
       },
     },
     html: {
