@@ -79,12 +79,14 @@ export function BillingHistoryDialog({
     page,
     pageSize,
     keyword,
+    status,
     loading,
     completing,
     isAdmin,
     handlePageChange,
     handlePageSizeChange,
     handleSearch,
+    handleStatusChange,
     handleCompleteOrder,
   } = useBillingHistory()
 
@@ -98,7 +100,7 @@ export function BillingHistoryDialog({
     if (exporting) return
     setExporting(true)
     try {
-      const count = await exportTopupOrdersCsv(t, keyword)
+      const count = await exportTopupOrdersCsv(t, keyword, status)
       if (count === 0) {
         toast.info(t('No data to export'))
       } else {
@@ -149,6 +151,31 @@ export function BillingHistoryDialog({
                 className='h-9 pl-10'
               />
             </div>
+            <Select
+              items={[
+                { value: 'all', label: t('All Status') },
+                { value: 'success', label: t('Success') },
+                { value: 'pending', label: t('Pending') },
+                { value: 'expired', label: t('Expired') },
+              ]}
+              value={status || 'all'}
+              onValueChange={(value) =>
+                value !== null &&
+                handleStatusChange(value === 'all' ? '' : value)
+              }
+            >
+              <SelectTrigger className='h-9 w-[92px] sm:w-32'>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent alignItemWithTrigger={false}>
+                <SelectGroup>
+                  <SelectItem value='all'>{t('All Status')}</SelectItem>
+                  <SelectItem value='success'>{t('Success')}</SelectItem>
+                  <SelectItem value='pending'>{t('Pending')}</SelectItem>
+                  <SelectItem value='expired'>{t('Expired')}</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
             <Select
               items={[
                 { value: '10', label: t('10 / page') },
@@ -220,7 +247,7 @@ export function BillingHistoryDialog({
                   {t('No billing records found')}
                 </p>
                 <p className='mt-1 text-xs'>
-                  {keyword
+                  {keyword || status
                     ? t('Try adjusting your search')
                     : t('Your transaction history will appear here')}
                 </p>

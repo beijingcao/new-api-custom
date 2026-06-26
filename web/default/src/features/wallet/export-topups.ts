@@ -27,14 +27,18 @@ const EXPORT_PAGE_SIZE = 100
  * Fetch every topup order matching the current admin search keyword, across all
  * pages — a fresh real-time snapshot rather than just the visible page.
  */
-async function fetchAllTopupOrders(keyword: string): Promise<TopupRecord[]> {
+async function fetchAllTopupOrders(
+  keyword: string,
+  status: string
+): Promise<TopupRecord[]> {
   const all: TopupRecord[] = []
   let page = 1
   for (;;) {
     const res = await getAllBillingHistory(
       page,
       EXPORT_PAGE_SIZE,
-      keyword || undefined
+      keyword || undefined,
+      status || undefined
     )
     const data = res?.data
     if (!isApiSuccess(res) || !data || !data.items || data.items.length === 0) {
@@ -54,9 +58,10 @@ async function fetchAllTopupOrders(keyword: string): Promise<TopupRecord[]> {
  */
 export async function exportTopupOrdersCsv(
   t: (key: string) => string,
-  keyword = ''
+  keyword = '',
+  status = ''
 ): Promise<number> {
-  const orders = await fetchAllTopupOrders(keyword)
+  const orders = await fetchAllTopupOrders(keyword, status)
   if (orders.length === 0) return 0
 
   const headers = [

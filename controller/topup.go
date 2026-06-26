@@ -488,8 +488,9 @@ func GetUserTopUps(c *gin.Context) {
 func GetAllTopUps(c *gin.Context) {
 	pageInfo := common.GetPageQuery(c)
 	keyword := c.Query("keyword")
+	status := c.Query("status")
 
-	topups, total, err := model.GetAdminTopUps(keyword, pageInfo)
+	topups, total, err := model.GetAdminTopUps(keyword, status, pageInfo)
 	if err != nil {
 		common.ApiError(c, err)
 		return

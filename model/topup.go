@@ -220,8 +220,9 @@ type TopUpWithUsername struct {
 
 // GetAdminTopUps 获取/搜索全平台充值记录（管理员使用，不限制时间窗口）。
 // keyword 为空时返回全部；否则按 订单号 / 用户名 模糊匹配，并在 keyword 为纯数字时
-// 额外按用户ID精确匹配。结果附带用户名（LEFT JOIN users）。
-func GetAdminTopUps(keyword string, pageInfo *common.PageInfo) (topups []*TopUpWithUsername, total int64, err error) {
+// 额外按用户ID精确匹配。status 非空时按充值状态（success/pending/expired）过滤。
+// 结果附带用户名（LEFT JOIN users）。
+func GetAdminTopUps(keyword string, status string, pageInfo *common.PageInfo) (topups []*TopUpWithUsername, total int64, err error) {
 	tx := DB.Begin()
 	if tx.Error != nil {
 		return nil, 0, tx.Error
@@ -234,6 +235,11 @@ func GetAdminTopUps(keyword string, pageInfo *common.PageInfo) (topups []*TopUpW
 
 	// LEFT JOIN 以便按用户名搜索并在结果中带出用户名；表名为 GORM 默认复数形式。
 	query := tx.Model(&TopUp{}).Joins("left join users on users.id = top_ups.user_id")
+
+	// 状态过滤：因与 users 表 JOIN（users 亦有 status 列），必须用 top_ups.status 限定列名以避免歧义。
+	if status != "" {
+		query = query.Where("top_ups.status = ?", status)
+	}
 
 	if keyword != "" {
 		pattern, perr := sanitizeLikePattern(keyword)
