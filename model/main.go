@@ -299,6 +299,8 @@ func migrateDB() error {
 		&SystemInstance{},
 		&SystemTask{},
 		&SystemTaskLock{},
+		&CasbinRule{},
+		&AuthzRole{},
 	)
 	if err != nil {
 		return err
@@ -312,29 +314,35 @@ func migrateDB() error {
 			return err
 		}
 	}
-	ensureUserIDStart()
+	if err := ensureUserIDStart(); err != nil {
+		return err
+	}
 	return nil
 }
 
-func ensureUserIDStart() {
+func ensureUserIDStart() error {
 	start := common.UserIDStart
 	if start <= 1 {
-		return
+		return nil
 	}
 	var maxId int
 	if err := DB.Model(&User{}).Select("COALESCE(MAX(id), 0)").Scan(&maxId).Error; err != nil {
-		common.SysError(fmt.Sprintf("failed to check max user id: %s", err.Error()))
-		return
+		return fmt.Errorf("failed to check max user id: %w", err)
 	}
 	if maxId >= start {
-		return
+		return nil
 	}
 	if common.UsingMainDatabase(common.DatabaseTypeMySQL) {
-		DB.Exec(fmt.Sprintf("ALTER TABLE users AUTO_INCREMENT = %d", start))
+		if err := DB.Exec(fmt.Sprintf("ALTER TABLE users AUTO_INCREMENT = %d", start)).Error; err != nil {
+			return fmt.Errorf("failed to set MySQL user ID start: %w", err)
+		}
 	} else if common.UsingMainDatabase(common.DatabaseTypePostgreSQL) {
-		DB.Exec(fmt.Sprintf("SELECT setval(pg_get_serial_sequence('users', 'id'), %d, false)", start))
+		if err := DB.Exec(fmt.Sprintf("SELECT setval(pg_get_serial_sequence('users', 'id'), %d, false)", start)).Error; err != nil {
+			return fmt.Errorf("failed to set PostgreSQL user ID start: %w", err)
+		}
 	}
 	common.SysLog(fmt.Sprintf("user ID auto-increment start set to %d", start))
+	return nil
 }
 
 func migrateDBFast() error {

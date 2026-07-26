@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { Construction } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+
+import { PublicLayout } from '@/components/layout'
 import { Markdown } from '@/components/ui/markdown'
 import { Skeleton } from '@/components/ui/skeleton'
-import { PublicLayout } from '@/components/layout'
+
 import { getDownloadPageContent } from './api'
 
 function isValidUrl(value: string) {
@@ -29,9 +31,7 @@ function EmptyDownloadState() {
           <Construction className='text-muted-foreground h-24 w-24' />
         </div>
         <div className='space-y-2'>
-          <h2 className='text-2xl font-bold'>
-            {t('No Download Content Set')}
-          </h2>
+          <h2 className='text-2xl font-bold'>{t('No Download Content Set')}</h2>
           <p className='text-muted-foreground'>
             {t(
               'The administrator has not configured any download content yet. You can set it in the system settings page.'

@@ -10,7 +10,7 @@ const semiUiDir = path.resolve(
   path.dirname(require.resolve('@douyinfe/semi-ui')),
   '../..',
 )
-const dateFnsDir = path.dirname(require.resolve('date-fns/package.json'))
+const dateFnsDir = path.join(semiUiDir, 'node_modules/date-fns')
 const dateFnsTzDir = path.dirname(require.resolve('date-fns-tz/package.json'))
 
 export default defineConfig(({ envMode }) => {
@@ -58,7 +58,7 @@ export default defineConfig(({ envMode }) => {
     },
     server: {
       host: '0.0.0.0',
-      strictPort: true,
+      strictPort: false,
       proxy: devProxy,
     },
     output: {

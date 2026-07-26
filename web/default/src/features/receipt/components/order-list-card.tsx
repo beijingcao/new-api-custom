@@ -1,21 +1,16 @@
+import { FileText, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { useState } from 'react'
-import {
-  FileText,
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle2,
-} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { cn } from '@/lib/utils'
-import { formatNumber } from '@/lib/format'
-import { formatTimestampToDate } from '@/lib/format'
+
+import { StatusBadge } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
-import { StatusBadge } from '@/components/status-badge'
-import {
-  getPaymentMethodName,
-} from '@/features/wallet/lib/billing'
+import { getPaymentMethodName } from '@/features/wallet/lib/billing'
+import { formatNumber } from '@/lib/format'
+import { formatTimestampToDate } from '@/lib/format'
+import { cn } from '@/lib/utils'
+
 import type { TopupOrder, InvoiceHeader } from '../types'
 import { InvoiceRequestDialog } from './invoice-request-dialog'
 
@@ -95,9 +90,7 @@ export function OrderListCard({
         <div className='mb-4 flex items-center justify-between'>
           <div className='flex items-center gap-2'>
             <FileText className='text-muted-foreground size-5' />
-            <h2 className='text-base font-semibold'>
-              {t('Order History')}
-            </h2>
+            <h2 className='text-base font-semibold'>{t('Order History')}</h2>
           </div>
           {selectedIds.size > 0 && (
             <Button
@@ -162,9 +155,7 @@ export function OrderListCard({
                       // Already-requested rows (issuing / invoiced) are locked
                       // and grayed out so the eye lands on the still-selectable
                       // orders above them.
-                      isLocked
-                        ? 'bg-muted/40 opacity-60'
-                        : 'hover:bg-muted/50'
+                      isLocked ? 'bg-muted/40 opacity-60' : 'hover:bg-muted/50'
                     )}
                   >
                     <div className='shrink-0'>

@@ -1,8 +1,10 @@
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { createRequire } from 'module'
+import { createRequire } from 'node:module'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import { defineConfig, loadEnv } from '@rsbuild/core'
 import { pluginReact } from '@rsbuild/plugin-react'
+import { pluginTailwindcss } from '@rsbuild/plugin-tailwindcss'
 import { tanstackRouter } from '@tanstack/router-plugin/rspack'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -14,7 +16,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const nodeRequire = createRequire(import.meta.url)
 const lobeIconsEsDir = path.join(
   path.dirname(nodeRequire.resolve('@lobehub/icons/package.json')),
-  'es',
+  'es'
 )
 
 export default defineConfig(({ envMode }) => {
@@ -29,11 +31,11 @@ export default defineConfig(({ envMode }) => {
     (['/api', '/mj', '/pg'] as const).map((key) => [
       key,
       { target: serverUrl, changeOrigin: true },
-    ]),
+    ])
   ) as Record<string, { target: string; changeOrigin: boolean }>
 
   return {
-    plugins: [pluginReact()],
+    plugins: [pluginReact(), pluginTailwindcss({ optimize: false })],
     // Rsbuild 2: replaces deprecated `performance.chunkSplit` (RSPack 2 aligned)
     splitChunks: {
       preset: 'default',
@@ -112,11 +114,7 @@ export default defineConfig(({ envMode }) => {
     performance: {
       // Remove console in production
       removeConsole: isProd ? ['log'] : false,
-      // Speed up repeated `rsbuild build` (local + CI when node_modules/.cache is preserved).
-      // @see https://v2.rsbuild.dev/config/performance/build-cache
-      buildCache: {
-        cacheDigest: [process.env.VITE_REACT_APP_VERSION],
-      },
+      buildCache: false,
     },
     tools: {
       rspack: {

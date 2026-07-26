@@ -18,12 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 export const INTERFACE_LANGUAGE_OPTIONS = [
-  { code: 'zh', label: '简体中文' },
+  { code: 'zhCN', label: '简体中文' },
   { code: 'en', label: 'English' },
-  { code: 'fr', label: 'Français' },
-  { code: 'ru', label: 'Русский' },
-  { code: 'ja', label: '日本語' },
-  { code: 'vi', label: 'Tiếng Việt' },
 ] as const
 
 export type InterfaceLanguageCode =
@@ -32,10 +28,42 @@ export type InterfaceLanguageCode =
 export function normalizeInterfaceLanguage(value?: string | null): string {
   if (!value) return 'en'
 
-  const normalized = value.trim().replace(/_/g, '-').toLowerCase()
-  if (normalized.startsWith('zh')) return 'zh'
+  const normalized = value.trim().replaceAll('_', '-').toLowerCase()
+  return normalized.startsWith('zh') ? 'zhCN' : 'en'
+}
 
-  return INTERFACE_LANGUAGE_OPTIONS.some((lang) => lang.code === normalized)
-    ? normalized
-    : 'en'
+/**
+ * Map a browser-detected locale onto the interface language codes this project
+ * uses with i18next (`zhCN`).
+ *
+ * Browsers report standard BCP-47 tags, while resources use the non-standard
+ * camelCase code. All Chinese variants map to Simplified Chinese.
+ */
+export function convertDetectedLanguage(value: string): string {
+  const lower = value.trim().replaceAll('_', '-').toLowerCase()
+  return lower.startsWith('zh') ? 'zhCN' : 'en'
+}
+
+/**
+ * Convert an interface language code into a valid BCP-47 locale tag that the
+ * `Intl.*` APIs accept.
+ *
+ * `new Intl.NumberFormat('zhCN')` throws `RangeError: Invalid language tag`, so
+ * any locale derived from `i18n.language` / `i18n.resolvedLanguage` MUST be run
+ * through this before it reaches an `Intl` constructor. Unknown values fall back
+ * to `undefined`, which makes `Intl` use the runtime default locale.
+ */
+export function toIntlLocale(value?: string | null): string | undefined {
+  if (!value) return undefined
+  switch (value) {
+    case 'zhCN':
+      return 'zh-CN'
+    default:
+      break
+  }
+  try {
+    return Intl.getCanonicalLocales(value)[0]
+  } catch {
+    return undefined
+  }
 }

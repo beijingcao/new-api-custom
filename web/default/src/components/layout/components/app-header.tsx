@@ -16,12 +16,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useNotifications } from '@/hooks/use-notifications'
-import { useSystemConfig } from '@/hooks/use-system-config'
-import { useTopNavLinks } from '@/hooks/use-top-nav-links'
 import { NotificationPopover } from '@/components/notification-popover'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
+import { useNotifications } from '@/hooks/use-notifications'
+import { useSystemConfig } from '@/hooks/use-system-config'
+import { useTopNavLinks } from '@/hooks/use-top-nav-links'
+
 import { defaultTopNavLinks } from '../config/top-nav.config'
 import { type TopNavLink } from '../types'
 import { Header } from './header'

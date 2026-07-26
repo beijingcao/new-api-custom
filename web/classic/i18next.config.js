@@ -17,11 +17,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import { defineConfig } from 'i18next-cli';
-
 /** @type {import('i18next-cli').I18nextToolkitConfig} */
-export default defineConfig({
-  locales: ['zh-CN', 'zh-TW', 'en', 'fr', 'ru', 'ja', 'vi'],
+export default {
+  locales: ['zh-CN', 'en'],
   extract: {
     input: ['src/**/*.{js,jsx,ts,tsx}'],
     ignore: ['src/i18n/**/*'],
@@ -83,4 +81,4 @@ export default defineConfig({
     keySeparator: false,
     mergeNamespaces: true,
   },
-});
+};

@@ -18,10 +18,12 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { Link } from '@tanstack/react-router'
 import { ArrowRight, BookOpen } from 'lucide-react'
-import { getLobeIcon } from '@/lib/lobe-icon'
 import { useTranslation } from 'react-i18next'
-import { useStatus } from '@/hooks/use-status'
+
 import { Button } from '@/components/ui/button'
+import { useStatus } from '@/hooks/use-status'
+import { getLobeIcon } from '@/lib/lobe-icon'
+
 import { HeroTerminalDemo } from '../hero-terminal-demo'
 
 interface HeroProps {

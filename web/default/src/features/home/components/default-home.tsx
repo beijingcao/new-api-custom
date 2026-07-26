@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Footer } from '@/components/layout/components/footer'
+
 import { CTA } from './sections/cta'
 import { Features } from './sections/features'
 import { Hero } from './sections/hero'
@@ -31,12 +32,8 @@ interface DefaultHomeProps {
  * The built-in marketing landing page, rendered only when no custom
  * HomePageContent is configured in admin settings.
  *
- * This lives in its own module on purpose: the Hero pulls in the large
- * @lobehub/icons brand-icon bundle. Keeping these sections behind a
- * lazy import (see ../index.tsx) ensures that bundle is NOT downloaded
- * on the home route when an operator has supplied custom home content
- * (the common case) — they never see these sections, so they should
- * never pay for them.
+ * Keeping these sections behind a lazy import means operators with custom home
+ * content do not download or render the built-in landing page.
  */
 export default function DefaultHome({ isAuthenticated }: DefaultHomeProps) {
   return (

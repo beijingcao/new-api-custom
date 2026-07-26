@@ -1,6 +1,3 @@
-import { useState, useEffect, useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
 import {
   Check,
   Clock,
@@ -11,8 +8,11 @@ import {
   Loader2,
   Search,
 } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
+
 import { SectionPageLayout } from '@/components/layout'
-import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -23,6 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { cn } from '@/lib/utils'
+
 import {
   getAdminInvoiceRequests,
   updateInvoiceRequest,
@@ -123,9 +125,7 @@ function InvoiceCard({
         <span className='font-medium'>
           #{item.id} · {item.username || `User ${item.user_id}`}
         </span>
-        <span className='text-muted-foreground text-xs'>
-          ID {item.user_id}
-        </span>
+        <span className='text-muted-foreground text-xs'>ID {item.user_id}</span>
         <span className='font-semibold'>¥{item.total_amount.toFixed(2)}</span>
         {isCompleted ? (
           <span className='inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400'>

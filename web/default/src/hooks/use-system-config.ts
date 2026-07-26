@@ -17,7 +17,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useEffect, useCallback } from 'react'
+
 import i18n, { loadLocale } from '@/i18n/config'
+import {
+  DEFAULT_LOGO,
+  DEFAULT_SYSTEM_NAME,
+  DEFAULT_SYSTEM_NAME_ZH,
+} from '@/lib/constants'
+import { applyFaviconToDom } from '@/lib/dom-utils'
 import {
   useSystemConfigStore,
   type CurrencyConfig,
@@ -25,8 +32,6 @@ import {
   type SystemConfig,
   DEFAULT_CURRENCY_CONFIG,
 } from '@/stores/system-config-store'
-import { DEFAULT_SYSTEM_NAME, DEFAULT_SYSTEM_NAME_ZH, DEFAULT_LOGO } from '@/lib/constants'
-import { applyFaviconToDom } from '@/lib/dom-utils'
 
 interface UseSystemConfigOptions {
   /** Automatically fetch config from backend (use only in root component) */
@@ -104,7 +109,11 @@ export function mapStatusDataToConfig(
 
   return {
     siteLanguage: (data.site_language as string) || 'zh',
-    systemName: data.system_name || ((data.site_language === 'zh') ? DEFAULT_SYSTEM_NAME_ZH : DEFAULT_SYSTEM_NAME),
+    systemName:
+      data.system_name ||
+      (data.site_language === 'zh'
+        ? DEFAULT_SYSTEM_NAME_ZH
+        : DEFAULT_SYSTEM_NAME),
     englishSiteUrl: (data.english_site_url as string) || '',
     chineseSiteUrl: (data.chinese_site_url as string) || '',
     logo: data.logo || DEFAULT_LOGO,
@@ -178,8 +187,8 @@ export function useSystemConfig(options: UseSystemConfigOptions = {}) {
       const newConfig = await fetchSystemConfig()
       setConfig(newConfig)
       if (newConfig.siteLanguage) {
-        await loadLocale(newConfig.siteLanguage)
-        i18n.changeLanguage(newConfig.siteLanguage)
+        const language = await loadLocale(newConfig.siteLanguage)
+        await i18n.changeLanguage(language)
       }
     } catch (error) {
       // eslint-disable-next-line no-console

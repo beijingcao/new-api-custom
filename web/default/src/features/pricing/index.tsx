@@ -18,8 +18,10 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+
 import { PublicLayout } from '@/components/layout'
 import { PageTransition } from '@/components/page-transition'
+
 import {
   LoadingSkeleton,
   EmptyState,
@@ -138,6 +140,7 @@ export function Pricing() {
           usdExchangeRate={usdExchangeRate}
           tokenUnit={tokenUnit}
           showRechargePrice={showRechargePrice}
+          selectedGroup={groupFilter}
         />
       )
     }
@@ -149,6 +152,7 @@ export function Pricing() {
         usdExchangeRate={usdExchangeRate}
         tokenUnit={tokenUnit}
         showRechargePrice={showRechargePrice}
+        selectedGroup={groupFilter}
         onModelClick={handleModelClick}
       />
     )

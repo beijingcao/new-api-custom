@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { formatNumber } from '@/lib/format'
+
+import { Dialog } from '@/components/dialog'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import {
@@ -11,7 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Dialog } from '@/components/dialog'
+import { formatNumber } from '@/lib/format'
+
 import type { InvoiceHeader, TopupOrder } from '../types'
 
 interface InvoiceRequestDialogProps {
@@ -87,9 +89,7 @@ export function InvoiceRequestDialog({
               onValueChange={(v) => v !== null && setSelectedHeaderId(v)}
             >
               <SelectTrigger>
-                <SelectValue
-                  placeholder={t('Select invoice header')}
-                />
+                <SelectValue placeholder={t('Select invoice header')} />
               </SelectTrigger>
               <SelectContent alignItemWithTrigger={false}>
                 <SelectGroup>
@@ -127,9 +127,7 @@ export function InvoiceRequestDialog({
 
         <div className='flex items-center justify-between rounded-lg border p-3'>
           <span className='text-sm font-medium'>{t('Total Amount')}</span>
-          <span className='text-lg font-bold'>
-            ¥{formatNumber(totalMoney)}
-          </span>
+          <span className='text-lg font-bold'>¥{formatNumber(totalMoney)}</span>
         </div>
       </div>
     </Dialog>

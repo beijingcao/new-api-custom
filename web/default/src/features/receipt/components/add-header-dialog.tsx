@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+
+import { Dialog } from '@/components/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Dialog } from '@/components/dialog'
 
 interface AddHeaderDialogProps {
   open: boolean
@@ -32,9 +33,7 @@ export function AddHeaderDialog({
   const [email, setEmail] = useState('')
 
   const canSubmit =
-    companyName.trim() !== '' &&
-    taxNumber.trim() !== '' &&
-    email.trim() !== ''
+    companyName.trim() !== '' && taxNumber.trim() !== '' && email.trim() !== ''
 
   const handleSubmit = async () => {
     const success = await onSubmit({

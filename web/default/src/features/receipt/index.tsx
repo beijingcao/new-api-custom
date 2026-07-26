@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+
 import { SectionPageLayout } from '@/components/layout'
 import { getUserBillingHistory } from '@/features/wallet/api'
+
 import {
   getInvoiceHeaders,
   getInvoiceRequests,
@@ -47,7 +49,12 @@ export function Receipt() {
     async (p: number) => {
       try {
         setOrdersLoading(true)
-        const res = await getUserBillingHistory(p, pageSize, undefined, 'success')
+        const res = await getUserBillingHistory(
+          p,
+          pageSize,
+          undefined,
+          'success'
+        )
         if (res.success && res.data) {
           setOrders(res.data.items as unknown as TopupOrder[])
           setTotal(res.data.total)

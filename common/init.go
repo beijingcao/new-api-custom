@@ -61,6 +61,9 @@ func InitEnv() {
 	} else {
 		CryptoSecret = SessionSecret
 	}
+	if err := InitSessionCookieSettings(); err != nil {
+		log.Fatal(err)
+	}
 	if os.Getenv("SQLITE_PATH") != "" {
 		SQLitePath = os.Getenv("SQLITE_PATH")
 	}
@@ -100,7 +103,7 @@ func InitEnv() {
 	requestInterval, _ = strconv.Atoi(os.Getenv("POLLING_INTERVAL"))
 	RequestInterval = time.Duration(requestInterval) * time.Second
 
-	UserIDStart = GetEnvOrDefault("USER_ID_START", 21010)
+	UserIDStart = GetEnvOrDefault("USER_ID_START", 682913)
 
 	// Initialize variables with GetEnvOrDefault
 	SyncFrequency = GetEnvOrDefault("SYNC_FREQUENCY", 60)

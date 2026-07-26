@@ -16,33 +16,48 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAuthStore } from '@/stores/auth-store'
-import { Markdown } from '@/components/ui/markdown'
+
 import { PublicLayout } from '@/components/layout'
+import { RichContent } from '@/components/rich-content'
+import { useTheme } from '@/context/theme-provider'
+import { isLikelyHtml } from '@/lib/content-format'
+import { useAuthStore } from '@/stores/auth-store'
+
 import { useHomePageContent } from './hooks'
 
-// The built-in marketing landing page is lazy-loaded: its Hero pulls the
-// large @lobehub/icons bundle, which must not weigh down the home route
-// when a custom HomePageContent is configured (then it never renders).
+// The built-in marketing landing page is not needed when custom content is set.
 const DefaultHome = lazy(() => import('./components/default-home'))
 
-// Operator-authored home content can be a full HTML document whose styling
-// lives in inline <style>/<link> elements. That content must render as raw
-// HTML — exactly like the About/Download/Legal pages do — because routing it
-// through <Markdown> runs it through DOMPurify, which strips <style>/<link>
-// and leaves the page unstyled. Plain Markdown content still uses <Markdown>.
-function isLikelyHtml(value: string) {
-  return /<\/?[a-z][\s\S]*>/i.test(value)
-}
-
 export function Home() {
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const { resolvedTheme } = useTheme()
   const { auth } = useAuthStore()
   const isAuthenticated = !!auth.user
   const { content, isLoaded, isUrl } = useHomePageContent()
-  const isHtml = !isUrl && isLikelyHtml(content)
+
+  const syncIframePreferences = useCallback(() => {
+    try {
+      iframeRef.current?.contentWindow?.postMessage(
+        { themeMode: resolvedTheme },
+        '*'
+      )
+      iframeRef.current?.contentWindow?.postMessage(
+        { lang: i18n.language },
+        '*'
+      )
+    } catch {
+      // Cross-origin frames may reject access while navigating.
+    }
+  }, [i18n.language, resolvedTheme])
+
+  useEffect(() => {
+    if (isUrl) {
+      syncIframePreferences()
+    }
+  }, [isUrl, syncIframePreferences])
 
   if (!isLoaded) {
     return (
@@ -55,28 +70,53 @@ export function Home() {
   }
 
   if (content) {
+    if (isUrl) {
+      return (
+        <PublicLayout showMainContainer={false}>
+          {/*
+            allow-top-navigation-by-user-activation: the custom home page URL is
+            admin-configured (trusted); this lets its target="_top" nav/menu links
+            navigate the top-level window on user click. The default sandbox blocks
+            this on desktop, while some mobile browsers allow it via allow-popups,
+            causing inconsistent behavior. This token only permits user-activated
+            top-level navigation and does NOT grant same-origin access.
+          */}
+          <iframe
+            ref={iframeRef}
+            src={content}
+            className='h-screen w-full border-none'
+            title={t('Custom Home Page')}
+            sandbox='allow-forms allow-popups allow-popups-to-escape-sandbox allow-scripts allow-top-navigation-by-user-activation'
+            onLoad={syncIframePreferences}
+          />
+        </PublicLayout>
+      )
+    }
+
+    const contentIsHtml = isLikelyHtml(content)
+
+    if (contentIsHtml) {
+      return (
+        <PublicLayout showMainContainer={false}>
+          <RichContent
+            mode='html'
+            htmlVariant='isolated'
+            content={content}
+            className='custom-home-content'
+          />
+        </PublicLayout>
+      )
+    }
+
     return (
-      <PublicLayout showMainContainer={false}>
-        <main className='overflow-x-hidden'>
-          {isUrl ? (
-            <iframe
-              src={content}
-              className='h-screen w-full border-none'
-              title={t('Custom Home Page')}
-            />
-          ) : (
-            <div className='container mx-auto py-8'>
-              {isHtml ? (
-                <div
-                  className='prose prose-neutral dark:prose-invert max-w-none custom-home-content'
-                  dangerouslySetInnerHTML={{ __html: content }}
-                />
-              ) : (
-                <Markdown className='custom-home-content'>{content}</Markdown>
-              )}
-            </div>
-          )}
-        </main>
+      <PublicLayout>
+        <div className='mx-auto max-w-6xl px-4 py-8'>
+          <RichContent
+            mode='markdown'
+            content={content}
+            className='custom-home-content'
+          />
+        </div>
       </PublicLayout>
     )
   }

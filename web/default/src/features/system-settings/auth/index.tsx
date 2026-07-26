@@ -34,6 +34,7 @@ const defaultAuthSettings: AuthSettings = {
   EmailDomainWhitelist: '',
   EmailDomainBlacklistEnabled: false,
   EmailDomainBlacklist: '',
+  ServerAddress: '',
   GitHubOAuthEnabled: false,
   GitHubClientId: '',
   GitHubClientSecret: '',

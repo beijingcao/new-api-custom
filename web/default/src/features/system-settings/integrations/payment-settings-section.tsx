@@ -16,15 +16,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import * as React from 'react'
-import * as z from 'zod'
-import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Code2, Eye, ShieldAlert } from 'lucide-react'
+import * as React from 'react'
+import { useForm, type Resolver } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
+import * as z from 'zod'
+
+import { RiskAcknowledgementDialog } from '@/components/risk-acknowledgement-dialog'
 import {
   Alert,
   AlertAction,
@@ -45,7 +46,8 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { RiskAcknowledgementDialog } from '@/components/risk-acknowledgement-dialog'
+import { cn } from '@/lib/utils'
+
 import { confirmPaymentCompliance } from '../api'
 import {
   SettingsForm,
@@ -1197,12 +1199,16 @@ export function PaymentSettingsSection({
                     {t('Alipay Official Gateway')}
                   </h3>
                   <p className='text-muted-foreground text-sm'>
-                    {t('Configuration for Alipay Open Platform website payment')}
+                    {t(
+                      'Configuration for Alipay Open Platform website payment'
+                    )}
                   </p>
                 </div>
 
                 <div className='rounded-md bg-blue-50 p-4 text-sm text-blue-900 dark:bg-blue-950 dark:text-blue-100'>
-                  <p className='mb-2 font-medium'>{t('Callback Configuration:')}</p>
+                  <p className='mb-2 font-medium'>
+                    {t('Callback Configuration:')}
+                  </p>
                   <ul className='list-inside list-disc space-y-1'>
                     <li>
                       {t('Notify URL:')}{' '}
@@ -1275,7 +1281,9 @@ export function PaymentSettingsSection({
                           <Input
                             placeholder={t('Alipay application AppID')}
                             {...field}
-                            onChange={(event) => field.onChange(event.target.value)}
+                            onChange={(event) =>
+                              field.onChange(event.target.value)
+                            }
                           />
                         </FormControl>
                         <FormDescription>
@@ -1296,11 +1304,15 @@ export function PaymentSettingsSection({
                           <Input
                             placeholder='https://example.com/api/alipay/notify'
                             {...field}
-                            onChange={(event) => field.onChange(event.target.value)}
+                            onChange={(event) =>
+                              field.onChange(event.target.value)
+                            }
                           />
                         </FormControl>
                         <FormDescription>
-                          {t('Optional. Defaults to ServerAddress callback URL.')}
+                          {t(
+                            'Optional. Defaults to ServerAddress callback URL.'
+                          )}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -1317,7 +1329,9 @@ export function PaymentSettingsSection({
                           <Input
                             placeholder='https://example.com/wallet?show_history=true'
                             {...field}
-                            onChange={(event) => field.onChange(event.target.value)}
+                            onChange={(event) =>
+                              field.onChange(event.target.value)
+                            }
                           />
                         </FormControl>
                         <FormDescription>
@@ -1342,7 +1356,9 @@ export function PaymentSettingsSection({
                             placeholder={t('Enter new key to update')}
                             autoComplete='new-password'
                             {...field}
-                            onChange={(event) => field.onChange(event.target.value)}
+                            onChange={(event) =>
+                              field.onChange(event.target.value)
+                            }
                           />
                         </FormControl>
                         <FormDescription>
@@ -1364,11 +1380,15 @@ export function PaymentSettingsSection({
                             rows={5}
                             placeholder={t('Alipay platform public key')}
                             {...field}
-                            onChange={(event) => field.onChange(event.target.value)}
+                            onChange={(event) =>
+                              field.onChange(event.target.value)
+                            }
                           />
                         </FormControl>
                         <FormDescription>
-                          {t('Used to verify Alipay asynchronous notifications')}
+                          {t(
+                            'Used to verify Alipay asynchronous notifications'
+                          )}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

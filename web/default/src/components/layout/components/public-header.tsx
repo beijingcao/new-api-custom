@@ -16,19 +16,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAuthStore } from '@/stores/auth-store'
-import { cn } from '@/lib/utils'
-import { useNotifications } from '@/hooks/use-notifications'
-import { useSystemConfig } from '@/hooks/use-system-config'
-import { useTopNavLinks } from '@/hooks/use-top-nav-links'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
+
 import { Dialog } from '@/components/dialog'
 import { NotificationPopover } from '@/components/notification-popover'
 import { ProfileDropdown } from '@/components/profile-dropdown'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useNotifications } from '@/hooks/use-notifications'
+import { useSystemConfig } from '@/hooks/use-system-config'
+import { useTopNavLinks } from '@/hooks/use-top-nav-links'
+import { cn } from '@/lib/utils'
+import { useAuthStore } from '@/stores/auth-store'
+
 import { defaultTopNavLinks } from '../config/top-nav.config'
 import type { TopNavLink } from '../types'
 import { HeaderLogo } from './header-logo'
@@ -224,20 +226,20 @@ export function PublicHeader(props: PublicHeaderProps) {
                 const isActive = pathname === link.href
                 if (link.external) {
                   return (
-	                    <a
-	                      key={i}
-	                      href={link.href}
-	                      target='_blank'
-	                      rel='noopener noreferrer'
-	                      aria-disabled={link.disabled}
-	                      tabIndex={link.disabled ? -1 : undefined}
-	                      onClick={(event) => handleNavLinkClick(event, link)}
-	                      className={cn(
-	                        'text-muted-foreground hover:text-foreground rounded-lg px-3 py-1.5 font-medium transition-colors duration-200',
-	                        link.disabled && 'pointer-events-none opacity-50'
-	                      )}
-	                      style={publicNavTextStyle}
-	                    >
+                    <a
+                      key={i}
+                      href={link.href}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      aria-disabled={link.disabled}
+                      tabIndex={link.disabled ? -1 : undefined}
+                      onClick={(event) => handleNavLinkClick(event, link)}
+                      className={cn(
+                        'text-muted-foreground hover:text-foreground rounded-lg px-3 py-1.5 font-medium transition-colors duration-200',
+                        link.disabled && 'pointer-events-none opacity-50'
+                      )}
+                      style={publicNavTextStyle}
+                    >
                       {t(link.title)}
                     </a>
                   )
@@ -262,21 +264,23 @@ export function PublicHeader(props: PublicHeaderProps) {
                 )
               })}
 
-              {(showLanguageSwitcher ||
-                showNotifications) && (
+              {(showLanguageSwitcher || showNotifications) && (
                 <div className='bg-border/40 mx-2 h-4 w-px' />
               )}
 
-              {showLanguageSwitcher && (siteLanguage === 'en' ? chineseSiteUrl : englishSiteUrl) && (
-                <a
-                  href={siteLanguage === 'en' ? chineseSiteUrl : englishSiteUrl}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='text-foreground/70 hover:text-foreground inline-flex h-9 items-center justify-center px-2 text-sm font-medium transition-colors'
-                >
-                  {siteLanguage === 'en' ? 'Chinese' : 'English'}
-                </a>
-              )}
+              {showLanguageSwitcher &&
+                (siteLanguage === 'en' ? chineseSiteUrl : englishSiteUrl) && (
+                  <a
+                    href={
+                      siteLanguage === 'en' ? chineseSiteUrl : englishSiteUrl
+                    }
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-foreground/70 hover:text-foreground inline-flex h-9 items-center justify-center px-2 text-sm font-medium transition-colors'
+                  >
+                    {siteLanguage === 'en' ? 'Chinese' : 'English'}
+                  </a>
+                )}
               {showNotifications && (
                 <NotificationPopover
                   open={notifications.popoverOpen}
@@ -384,44 +388,49 @@ export function PublicHeader(props: PublicHeaderProps) {
                     rel='noopener noreferrer'
                     aria-disabled={link.disabled}
                     tabIndex={link.disabled ? -1 : undefined}
-	                    onClick={(event) => handleNavLinkClick(event, link, true)}
-	                    className={linkClassName}
-	                    style={{ ...publicNavTextStyle, ...transitionStyle }}
-	                  >
+                    onClick={(event) => handleNavLinkClick(event, link, true)}
+                    className={linkClassName}
+                    style={{ ...publicNavTextStyle, ...transitionStyle }}
+                  >
                     {t(link.title)}
                   </a>
                 )
               }
               return (
-	                <Link
-	                  key={i}
-	                  to={link.href}
-	                  disabled={link.disabled}
-	                  onClick={(event) => handleNavLinkClick(event, link, true)}
-	                  className={linkClassName}
-	                  style={{ ...publicNavTextStyle, ...transitionStyle }}
-	                >
+                <Link
+                  key={i}
+                  to={link.href}
+                  disabled={link.disabled}
+                  onClick={(event) => handleNavLinkClick(event, link, true)}
+                  className={linkClassName}
+                  style={{ ...publicNavTextStyle, ...transitionStyle }}
+                >
                   {t(link.title)}
                 </Link>
               )
             })}
-            {showLanguageSwitcher && (siteLanguage === 'en' ? chineseSiteUrl : englishSiteUrl) && (
-              <a
-                href={siteLanguage === 'en' ? chineseSiteUrl : englishSiteUrl}
-                target='_blank'
-                rel='noopener noreferrer'
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  'text-muted-foreground flex items-center gap-3 py-3 text-base font-medium tracking-tight transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
-                  mobileOpen
-                    ? 'translate-y-0 opacity-100'
-                    : 'translate-y-4 opacity-0'
-                )}
-                style={{ transitionDelay: mobileOpen ? `${100 + links.length * 50}ms` : '0ms' }}
-              >
-                {siteLanguage === 'en' ? 'Chinese' : 'English'}
-              </a>
-            )}
+            {showLanguageSwitcher &&
+              (siteLanguage === 'en' ? chineseSiteUrl : englishSiteUrl) && (
+                <a
+                  href={siteLanguage === 'en' ? chineseSiteUrl : englishSiteUrl}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  onClick={() => setMobileOpen(false)}
+                  className={cn(
+                    'text-muted-foreground flex items-center gap-3 py-3 text-base font-medium tracking-tight transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
+                    mobileOpen
+                      ? 'translate-y-0 opacity-100'
+                      : 'translate-y-4 opacity-0'
+                  )}
+                  style={{
+                    transitionDelay: mobileOpen
+                      ? `${100 + links.length * 50}ms`
+                      : '0ms',
+                  }}
+                >
+                  {siteLanguage === 'en' ? 'Chinese' : 'English'}
+                </a>
+              )}
           </nav>
 
           <div
@@ -437,7 +446,7 @@ export function PublicHeader(props: PublicHeaderProps) {
               <Link
                 to={isAuthenticated ? '/dashboard' : '/sign-in'}
                 onClick={() => setMobileOpen(false)}
-                className='border-border bg-background text-foreground inline-flex h-10 items-center justify-center rounded-lg border font-medium transition-colors hover:bg-muted'
+                className='border-border bg-background text-foreground hover:bg-muted inline-flex h-10 items-center justify-center rounded-lg border font-medium transition-colors'
                 style={publicNavTextStyle}
               >
                 {isAuthenticated ? t('Go to Dashboard') : t('Sign in')}
