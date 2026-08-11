@@ -133,24 +133,18 @@ func TestCurrentAlipayGatewayIncludesCharsetQuery(t *testing.T) {
 	require.Equal(t, alipayGatewaySandbox+"?charset=utf-8", currentAlipayGateway())
 }
 
-func TestBuildAlipayReturnURLUsesFrontendThemeRoute(t *testing.T) {
+func TestBuildAlipayReturnURLUsesWalletRoute(t *testing.T) {
 	originalReturnURL := setting.AlipayReturnURL
 	originalServerAddress := system_setting.ServerAddress
-	originalTheme := common.GetTheme()
 	t.Cleanup(func() {
 		setting.AlipayReturnURL = originalReturnURL
 		system_setting.ServerAddress = originalServerAddress
-		common.SetTheme(originalTheme)
 	})
 
 	setting.AlipayReturnURL = ""
 	system_setting.ServerAddress = "https://ai.num.cc"
 
-	common.SetTheme("default")
 	require.Equal(t, "https://ai.num.cc/wallet?show_history=true", buildAlipayReturnURL())
-
-	common.SetTheme("classic")
-	require.Equal(t, "https://ai.num.cc/console/topup?show_history=true", buildAlipayReturnURL())
 }
 
 func TestBuildAlipayRequestParamsUsesFixedOrderSubject(t *testing.T) {
@@ -161,7 +155,7 @@ func TestBuildAlipayRequestParamsUsesFixedOrderSubject(t *testing.T) {
 	})
 	setting.AlipayPrivateKey = privateKey
 
-	params, err := buildAlipayRequestParams("USR1NOAwL8pZ1777790745", 7.30, "https://ai.num.cc/api/alipay/notify", "https://ai.num.cc/console/topup?show_history=true")
+	params, err := buildAlipayRequestParams("USR1NOAwL8pZ1777790745", 7.30, "https://ai.num.cc/api/alipay/notify", "https://ai.num.cc/wallet?show_history=true")
 	require.NoError(t, err)
 
 	var biz alipayPagePayBizContent

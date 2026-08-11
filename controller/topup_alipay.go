@@ -275,14 +275,7 @@ func buildAlipayReturnURL() string {
 	if serverAddress == "" {
 		return ""
 	}
-	return serverAddress + buildAlipayTopUpReturnPath()
-}
-
-func buildAlipayTopUpReturnPath() string {
-	if common.GetTheme() == "default" {
-		return "/wallet?show_history=true"
-	}
-	return "/console/topup?show_history=true"
+	return serverAddress + "/wallet?show_history=true"
 }
 
 func RequestAlipayAmount(c *gin.Context) {
