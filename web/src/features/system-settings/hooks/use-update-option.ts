@@ -39,6 +39,7 @@ const STATUS_RELATED_KEYS = new Set([
   'USDExchangeRate',
   'DisplayInCurrencyEnabled',
   'DisplayTokenStatEnabled',
+  'ReceiptEnabled',
   'general_setting.quota_display_type',
   'general_setting.custom_currency_symbol',
   'general_setting.custom_currency_exchange_rate',
@@ -67,7 +68,11 @@ export function useUpdateOption() {
 
         if (variables.key === 'SiteLanguage') {
           const lang = String(variables.value)
-          loadLocale(lang).then((language) => i18next.changeLanguage(language))
+          loadLocale(lang)
+            .then((language) => i18next.changeLanguage(language))
+            .catch(() => {
+              toast.error(i18next.t('Failed to update setting'))
+            })
         }
 
         toast.success(i18next.t('Setting updated successfully'))

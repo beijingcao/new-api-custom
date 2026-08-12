@@ -39,6 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 
 import { FormDirtyIndicator } from '../components/form-dirty-indicator'
@@ -47,6 +48,8 @@ import {
   SettingsForm,
   SettingsFormGrid,
   SettingsFormGridItem,
+  SettingsSwitchContent,
+  SettingsSwitchItem,
 } from '../components/settings-form-layout'
 import { SettingsPageFormActions } from '../components/settings-page-context'
 import { SettingsSection } from '../components/settings-section'
@@ -59,6 +62,7 @@ const _systemInfoSchema = z.object({
   ChineseSiteUrl: z.string().url().optional().or(z.literal('')),
   SystemName: z.string().min(1),
   ServerAddress: z.string().optional(),
+  ReceiptEnabled: z.boolean(),
   Logo: z.string().url().optional().or(z.literal('')),
   PublicNavigationFontSize: z.coerce.number().min(10).max(24),
   HeadScript: z.string().optional(),
@@ -93,6 +97,7 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
     ChineseSiteUrl: normalizeValue(defaultValues.ChineseSiteUrl),
     SystemName: normalizeValue(defaultValues.SystemName),
     ServerAddress: normalizeValue(defaultValues.ServerAddress),
+    ReceiptEnabled: defaultValues.ReceiptEnabled !== false,
     Logo: normalizeValue(defaultValues.Logo),
     PublicNavigationFontSize: Number(
       defaultValues.PublicNavigationFontSize || 16
@@ -116,6 +121,7 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
       error: () => t('System name is required'),
     }),
     ServerAddress: z.string().optional(),
+    ReceiptEnabled: z.boolean(),
     Logo: z.string().url().optional().or(z.literal('')),
     PublicNavigationFontSize: z.coerce
       .number()
@@ -284,6 +290,28 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='ReceiptEnabled'
+                render={({ field }) => (
+                  <SettingsSwitchItem>
+                    <SettingsSwitchContent>
+                      <FormLabel>{t('Show Receipt Menu')}</FormLabel>
+                      <FormDescription>
+                        {t('Show the receipt entry in the user sidebar menu')}
+                      </FormDescription>
+                    </SettingsSwitchContent>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </SettingsSwitchItem>
                 )}
               />
 

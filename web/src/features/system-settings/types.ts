@@ -120,6 +120,7 @@ export type SiteSettings = {
   DownloadPage: string
   HomePageContent: string
   ServerAddress: string
+  ReceiptEnabled: boolean
   'legal.user_agreement': string
   'legal.privacy_policy': string
   HeaderNavModules: string

@@ -29,8 +29,13 @@ func TestUpdateOptionRejectsRetiredFrontendTheme(t *testing.T) {
 
 func TestGetStatusAdvertisesDefaultDashboard(t *testing.T) {
 	previousMap := common.OptionMap
+	previousReceiptEnabled := common.ReceiptEnabled
 	common.OptionMap = map[string]string{}
-	t.Cleanup(func() { common.OptionMap = previousMap })
+	common.ReceiptEnabled = true
+	t.Cleanup(func() {
+		common.OptionMap = previousMap
+		common.ReceiptEnabled = previousReceiptEnabled
+	})
 	response := httptest.NewRecorder()
 	context, _ := gin.CreateTestContext(response)
 	context.Request = httptest.NewRequest(http.MethodGet, "/api/status", nil)
@@ -44,4 +49,5 @@ func TestGetStatusAdvertisesDefaultDashboard(t *testing.T) {
 	require.NoError(t, common.Unmarshal(response.Body.Bytes(), &payload))
 	assert.True(t, payload.Success)
 	assert.Equal(t, "default", payload.Data["theme"])
+	assert.Equal(t, true, payload.Data["receipt_enabled"])
 }

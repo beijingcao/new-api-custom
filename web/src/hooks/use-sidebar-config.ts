@@ -22,6 +22,8 @@ import type { NavGroup, NavItem } from '@/components/layout/types'
 import { useStatus } from '@/hooks/use-status'
 import { useAuthStore } from '@/stores/auth-store'
 
+import { isReceiptRouteVisible } from './sidebar-receipt-visibility'
+
 type SidebarSectionConfig = {
   enabled: boolean
   [key: string]: boolean
@@ -172,8 +174,13 @@ function parseUserSidebarConfig(
 function isModuleEnabled(
   url: string,
   adminConfig: SidebarModulesAdminConfig,
-  userConfig: SidebarModulesUserConfig
+  userConfig: SidebarModulesUserConfig,
+  receiptEnabled: boolean
 ): boolean {
+  if (!isReceiptRouteVisible(url, receiptEnabled)) {
+    return false
+  }
+
   const mapping = URL_TO_CONFIG_MAP[url]
   if (!mapping) {
     // No mapping config, default to visible (e.g. system settings and new features)
@@ -201,7 +208,8 @@ function isModuleEnabled(
 function isNavItemVisible(
   item: NavItem,
   adminConfig: SidebarModulesAdminConfig,
-  userConfig: SidebarModulesUserConfig
+  userConfig: SidebarModulesUserConfig,
+  receiptEnabled: boolean
 ): boolean {
   // Handle dynamic chat presets type — also runs the admin × user AND gate
   if ('type' in item && item.type === 'chat-presets') {
@@ -219,7 +227,7 @@ function isNavItemVisible(
   if ('url' in item && item.url) {
     const configUrls = item.configUrls ?? [item.url]
     return configUrls.some((url) =>
-      isModuleEnabled(url as string, adminConfig, userConfig)
+      isModuleEnabled(url as string, adminConfig, userConfig, receiptEnabled)
     )
   }
 
@@ -227,7 +235,12 @@ function isNavItemVisible(
   if ('items' in item && item.items) {
     // If has sub-items, show this collapsible item if at least one sub-item is visible
     return item.items.some((subItem) =>
-      isModuleEnabled(subItem.url as string, adminConfig, userConfig)
+      isModuleEnabled(
+        subItem.url as string,
+        adminConfig,
+        userConfig,
+        receiptEnabled
+      )
     )
   }
 
@@ -240,14 +253,20 @@ function isNavItemVisible(
 function filterNavItems(
   items: NavItem[],
   adminConfig: SidebarModulesAdminConfig,
-  userConfig: SidebarModulesUserConfig
+  userConfig: SidebarModulesUserConfig,
+  receiptEnabled: boolean
 ): NavItem[] {
   return items
     .map((item) => {
       // If collapsible item, also filter its sub-items
       if ('items' in item && item.items) {
         const filteredSubItems = item.items.filter((subItem) =>
-          isModuleEnabled(subItem.url as string, adminConfig, userConfig)
+          isModuleEnabled(
+            subItem.url as string,
+            adminConfig,
+            userConfig,
+            receiptEnabled
+          )
         )
 
         return {
@@ -257,7 +276,9 @@ function filterNavItems(
       }
       return item
     })
-    .filter((item) => isNavItemVisible(item, adminConfig, userConfig))
+    .filter((item) =>
+      isNavItemVisible(item, adminConfig, userConfig, receiptEnabled)
+    )
 }
 
 /**
@@ -279,6 +300,7 @@ function filterNavItems(
 export function useSidebarConfig(navGroups: NavGroup[]): NavGroup[] {
   const { status } = useStatus()
   const { auth } = useAuthStore()
+  const receiptEnabled = status?.receipt_enabled !== false
 
   const adminConfig = useMemo(
     () =>
@@ -305,10 +327,15 @@ export function useSidebarConfig(navGroups: NavGroup[]): NavGroup[] {
       navGroups
         .map((group) => ({
           ...group,
-          items: filterNavItems(group.items, adminConfig, userConfig),
+          items: filterNavItems(
+            group.items,
+            adminConfig,
+            userConfig,
+            receiptEnabled
+          ),
         }))
         .filter((group) => group.items.length > 0), // Only show navigation groups with visible items
-    [navGroups, adminConfig, userConfig]
+    [navGroups, adminConfig, userConfig, receiptEnabled]
   )
 
   return filteredNavGroups
@@ -330,6 +357,7 @@ export function useIsSidebarModuleVisible(url: string): boolean {
     auth?.user?.permissions?.sidebar_settings === false
       ? null
       : parseUserSidebarConfig(auth?.user?.sidebar_modules)
+  const receiptEnabled = status?.receipt_enabled !== false
 
-  return isModuleEnabled(url, adminConfig, userConfig)
+  return isModuleEnabled(url, adminConfig, userConfig, receiptEnabled)
 }

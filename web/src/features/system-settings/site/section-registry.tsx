@@ -48,6 +48,7 @@ const SITE_SECTIONS = [
           DownloadPage: settings.DownloadPage,
           HomePageContent: settings.HomePageContent,
           ServerAddress: settings.ServerAddress,
+          ReceiptEnabled: settings.ReceiptEnabled,
           legal: {
             user_agreement: settings['legal.user_agreement'],
             privacy_policy: settings['legal.privacy_policy'],
