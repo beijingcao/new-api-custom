@@ -16,18 +16,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import assert from 'node:assert/strict'
-import { describe, test } from 'node:test'
+import { describe, expect, test } from 'vitest'
 
 import { isReceiptRouteVisible } from '../sidebar-receipt-visibility.ts'
 
 describe('receipt sidebar visibility', () => {
   test('keeps the receipt route visible when the backend setting is enabled', () => {
-    assert.equal(isReceiptRouteVisible('/receipt', true), true)
+    expect(isReceiptRouteVisible('/receipt', true)).toBe(true)
   })
 
   test('hides only the user receipt route when the backend setting is disabled', () => {
-    assert.equal(isReceiptRouteVisible('/receipt', false), false)
-    assert.equal(isReceiptRouteVisible('/invoice-management', false), true)
+    expect(isReceiptRouteVisible('/receipt', false)).toBe(false)
+    expect(isReceiptRouteVisible('/invoice-management', false)).toBe(true)
   })
 })
