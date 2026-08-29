@@ -116,6 +116,15 @@ export const STATIC_I18N_KEYS = [
   'Failed to update user',
   'Failed to delete user',
   'No user selected',
+  'Enable selected users',
+  'Disable selected users',
+  'Delete selected users',
+  'Delete selected users?',
+  'This will permanently delete {{count}} selected user(s). This action cannot be undone.',
+  'Successfully enabled {{count}} selected user(s)',
+  'Successfully disabled {{count}} selected user(s)',
+  'Successfully deleted {{count}} selected user(s)',
+  'Failed to process {{count}} selected user(s)',
 
   // Redemption codes
   'Unused',
