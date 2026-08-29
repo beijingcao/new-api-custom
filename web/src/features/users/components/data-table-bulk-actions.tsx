@@ -16,6 +16,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { RefreshIcon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import type { Table } from '@tanstack/react-table'
 import { Power, PowerOff, Trash2 } from 'lucide-react'
 import { useState } from 'react'
@@ -31,12 +33,14 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
-import { deleteUser, manageUser } from '../api'
+import { adjustUserQuota, deleteUser, manageUser } from '../api'
 import { ERROR_MESSAGES } from '../constants'
 import type { ManageUserAction, User } from '../types'
 import { useUsers } from './users-provider'
 
-type BulkUserAction = Extract<ManageUserAction, 'enable' | 'disable' | 'delete'>
+type BulkUserAction =
+  | Extract<ManageUserAction, 'enable' | 'disable' | 'delete'>
+  | 'reset_quota'
 
 interface DataTableBulkActionsProps {
   table: Table<User>
@@ -49,6 +53,9 @@ function getBulkActionSuccessMessage(action: BulkUserAction): string {
   if (action === 'enable') {
     return 'Successfully enabled {{count}} selected user(s)'
   }
+  if (action === 'reset_quota') {
+    return 'Successfully reset quota for {{count}} selected user(s)'
+  }
   return 'Successfully disabled {{count}} selected user(s)'
 }
 
@@ -56,6 +63,7 @@ export function DataTableBulkActions({ table }: DataTableBulkActionsProps) {
   const { t } = useTranslation()
   const { triggerRefresh } = useUsers()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [resetQuotaDialogOpen, setResetQuotaDialogOpen] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
 
   const selectedUsers = table
@@ -71,6 +79,14 @@ export function DataTableBulkActions({ table }: DataTableBulkActionsProps) {
         selectedUsers.map(async (user) => {
           if (action === 'delete') {
             return deleteUser(user.id)
+          }
+          if (action === 'reset_quota') {
+            return adjustUserQuota({
+              id: user.id,
+              action: 'add_quota',
+              mode: 'override',
+              value: 0,
+            })
           }
           return manageUser(user.id, action)
         })
@@ -94,6 +110,7 @@ export function DataTableBulkActions({ table }: DataTableBulkActionsProps) {
 
       table.resetRowSelection()
       setDeleteDialogOpen(false)
+      setResetQuotaDialogOpen(false)
     } catch {
       toast.error(t(ERROR_MESSAGES.UNEXPECTED))
     } finally {
@@ -150,6 +167,26 @@ export function DataTableBulkActions({ table }: DataTableBulkActionsProps) {
           <TooltipTrigger
             render={
               <Button
+                variant='outline'
+                size='icon'
+                className='size-8'
+                disabled={isProcessing}
+                onClick={() => setResetQuotaDialogOpen(true)}
+                aria-label={t("Reset selected users' quota")}
+                title={t("Reset selected users' quota")}
+              />
+            }
+          >
+            <HugeiconsIcon icon={RefreshIcon} strokeWidth={2} />
+            <span className='sr-only'>{t("Reset selected users' quota")}</span>
+          </TooltipTrigger>
+          <TooltipContent>{t("Reset selected users' quota")}</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
                 variant='destructive'
                 size='icon'
                 className='size-8'
@@ -179,6 +216,20 @@ export function DataTableBulkActions({ table }: DataTableBulkActionsProps) {
         destructive
         isLoading={isProcessing}
         handleConfirm={() => processAction('delete')}
+      />
+
+      <ConfirmDialog
+        open={resetQuotaDialogOpen}
+        onOpenChange={setResetQuotaDialogOpen}
+        title={t("Reset selected users' quota?")}
+        desc={t(
+          'This will reset the quota of {{count}} selected user(s) to 0.',
+          { count: selectedCount }
+        )}
+        confirmText={isProcessing ? t('Resetting...') : t('Reset quota')}
+        destructive
+        isLoading={isProcessing}
+        handleConfirm={() => processAction('reset_quota')}
       />
     </>
   )

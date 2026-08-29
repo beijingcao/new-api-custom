@@ -27,6 +27,7 @@ import { DataTableBulkActions } from '../data-table-bulk-actions'
 import { UsersProvider } from '../users-provider'
 
 const mocks = vi.hoisted(() => ({
+  adjustUserQuota: vi.fn(),
   deleteUser: vi.fn(),
   manageUser: vi.fn(),
   toastError: vi.fn(),
@@ -34,6 +35,7 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock('../../api', () => ({
+  adjustUserQuota: mocks.adjustUserQuota,
   deleteUser: mocks.deleteUser,
   manageUser: mocks.manageUser,
 }))
@@ -113,6 +115,7 @@ function renderBulkActions(users: User[]) {
 describe('user bulk actions', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mocks.adjustUserQuota.mockResolvedValue({ success: true })
     mocks.manageUser.mockResolvedValue({ success: true })
     mocks.deleteUser.mockResolvedValue({ success: true })
   })
@@ -152,6 +155,38 @@ describe('user bulk actions', () => {
     expect(mocks.deleteUser).toHaveBeenCalledWith(4)
     expect(mocks.toastSuccess).toHaveBeenCalledWith(
       'Successfully deleted 2 selected user(s)'
+    )
+  })
+
+  test('requires confirmation before resetting every selected user quota to zero', async () => {
+    const user = userEvent.setup()
+    renderBulkActions([createUser(7), createUser(8)])
+
+    await user.click(
+      screen.getByRole('button', { name: "Reset selected users' quota" })
+    )
+    expect(screen.getByRole('dialog')).toHaveTextContent(
+      'This will reset the quota of 2 selected user(s) to 0.'
+    )
+    expect(mocks.adjustUserQuota).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: 'Reset quota' }))
+
+    expect(mocks.adjustUserQuota).toHaveBeenCalledTimes(2)
+    expect(mocks.adjustUserQuota).toHaveBeenCalledWith({
+      id: 7,
+      action: 'add_quota',
+      mode: 'override',
+      value: 0,
+    })
+    expect(mocks.adjustUserQuota).toHaveBeenCalledWith({
+      id: 8,
+      action: 'add_quota',
+      mode: 'override',
+      value: 0,
+    })
+    expect(mocks.toastSuccess).toHaveBeenCalledWith(
+      'Successfully reset quota for 2 selected user(s)'
     )
   })
 

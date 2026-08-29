@@ -120,10 +120,14 @@ export const STATIC_I18N_KEYS = [
   'Disable selected users',
   'Delete selected users',
   'Delete selected users?',
+  "Reset selected users' quota",
+  "Reset selected users' quota?",
   'This will permanently delete {{count}} selected user(s). This action cannot be undone.',
+  'This will reset the quota of {{count}} selected user(s) to 0.',
   'Successfully enabled {{count}} selected user(s)',
   'Successfully disabled {{count}} selected user(s)',
   'Successfully deleted {{count}} selected user(s)',
+  'Successfully reset quota for {{count}} selected user(s)',
   'Failed to process {{count}} selected user(s)',
 
   // Redemption codes
